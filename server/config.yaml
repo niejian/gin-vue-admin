@@ -11,9 +11,9 @@ jwt:
 # mysql connect configuration
 mysql:
   username: root
-  password: 'Aa@6447985'
-  path: '127.0.0.1:3306'
-  db-name: 'qmPlus'
+  password: 'code4fun1234'
+  path: '192.168.242.151:3306'
+  db-name: 'ginVueAdmin'
   config: 'charset=utf8mb4&parseTime=True&loc=Local'
   max-idle-conns: 10
   max-open-conns: 10
@@ -53,6 +53,7 @@ system:
   addr: 8888
   db-type: "mysql"  # support mysql/sqlite
   need-init-data: false
+  use-es: true
 
 # captcha configuration
 captcha:
@@ -81,3 +82,11 @@ zap:
   encode_level: 'LowercaseColorLevelEncoder'
   stacktrace_key: 'stacktrace'
   log_in_console: true
+
+es:
+  urls:
+    - http://192.168.243.16:9200
+    - http://192.168.243.17:9200
+    - http://192.168.243.8:9200
+  username: elastic
+  password: GreatAge

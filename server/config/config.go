@@ -11,6 +11,7 @@ type Server struct {
 	Captcha     Captcha     `mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 	Zap         Zap         `mapstructure:"zap" json:"zap" yaml:"zap"`
 	LocalUpload LocalUpload `mapstructure:"localUpload" json:"localUpload" yaml:"localUpload"`
+	Es          Es          `mapstructure:"es" json:"es" yaml:"es"` // Es节点配置
 }
 
 type System struct {
@@ -19,6 +20,7 @@ type System struct {
 	Addr          int    `mapstructure:"addr" json:"addr" yaml:"addr"`
 	DbType        string `mapstructure:"db-type" json:"dbType" yaml:"db-type"`
 	NeedInitData  bool   `mapstructure:"need-init-data" json:"needInitData" yaml:"need-init-data"`
+	UseEs         bool   `mapstructure:"use-es" json:"userEs" yaml:"use-es"`
 }
 
 type JWT struct {
@@ -83,4 +85,10 @@ type Zap struct {
 	EncodeLevel   string `mapstructure:"encode_level" json:"encodeLevel" yaml:"encode_level"`
 	StacktraceKey string `mapstructure:"stacktrace_key" json:"stacktraceKey" yaml:"stacktrace_key"`
 	LogInConsole  bool   `mapstructure:"log_in_console" json:"logInConsole" yaml:"log_in_console"`
+}
+
+type Es struct {
+	Urls     []string `mapstructure:"urls" json:"urls" yaml:"urls"`
+	Username string   `mapstructure:"username" json:"username" yaml:"username"`
+	Password string   `mapstructure:"password" json:"password" yaml:"password"`
 }

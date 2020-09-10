@@ -10,6 +10,7 @@ import (
 
 const defaultConfigFile = "config.yaml"
 
+// package init 函数在main方法之前调用
 func init() {
 	v := viper.New()
 	v.SetConfigFile(defaultConfigFile)

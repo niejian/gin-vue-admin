@@ -72,7 +72,7 @@
                             show: true,
                             textStyle: {
                                 color: 'rgb(192,192,192)',  //更改坐标轴文字颜色
-                                fontSize : 12     //更改坐标轴文字大小
+                                fontSize : 15    //更改坐标轴文字大小
                             }
                         },
                         axisTick: {

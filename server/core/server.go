@@ -17,6 +17,12 @@ func RunWindowsServer() {
 		// 初始化redis服务
 		initialize.Redis()
 	}
+
+	if global.GVA_CONFIG.System.UseEs {
+		// 初始化es服务
+		initialize.ElasticSearch()
+	}
+
 	Router := initialize.Routers()
 	Router.Static("/form-generator", "./resource/page")
 
