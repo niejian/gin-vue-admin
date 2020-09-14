@@ -4,7 +4,7 @@
     <div>
     <el-form ref="form" >
       <el-form-item label="索引" label-width="200px">
-        <el-select v-model="selectedIndexName" placeholder="请选择" 
+        <el-select v-model="selectedIndexName" filterable placeholder="请选择" 
           style="width:400px"
           size="medium" @change="indexChange">
           <el-option
