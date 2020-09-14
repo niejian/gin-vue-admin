@@ -78,6 +78,8 @@ func FindFDatasByIndiceName(queryExceptionRequest *request.GetExceptionDetailStr
 	var ex es.Exception
 	for _, item := range searchResult.Each(reflect.TypeOf(ex)) {
 		i := item.(es.Exception)
+		msg := "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"
+		i.Msg = msg
 		exs = append(exs, i)
 	}
 

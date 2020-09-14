@@ -42,6 +42,26 @@ func GetExceptionView(c *gin.Context) {
 
 }
 
+func GetExceptionViewByIndexName(c *gin.Context) {
+	var requestData request.GetExceptionOverviewByIndexNameStruct
+	c.ShouldBindJSON(&requestData)
+	// 校验请求参数是否为空
+	rules := utils.Rules{
+		"IndexName": {utils.NotEmpty()},
+	}
+
+	verifyErr := utils.Verify(requestData, rules)
+	if nil != verifyErr {
+		response.FailWithMessage(verifyErr.Error(), c)
+		return
+	}
+	// 聚合查询错误列表信息
+	aggIndexs := service.IndexOverview(requestData.IndexName)
+
+	response.OkWithData(resp.AggIndexResponse{AggIndexs: aggIndexs}, c)
+
+}
+
 // @Tags GetExceptionDetails
 // @Summary 获取异常详细信息
 // @Security ApiKeyAuth
@@ -51,7 +71,7 @@ func GetExceptionView(c *gin.Context) {
 // @Router /exception/view [post]
 func GetExceptionDetails(c *gin.Context) {
 	// 获取请求参数
-	var exceptionRequest *request.GetExceptionDetailStruct
+	var exceptionRequest request.GetExceptionDetailStruct
 	c.ShouldBindJSON(&exceptionRequest)
 	// 校验
 	exceptionValid := utils.Rules{
@@ -66,7 +86,7 @@ func GetExceptionDetails(c *gin.Context) {
 	}
 
 	// 查询索引详细信息
-	datas, err := service.FindFDatasByIndiceName(exceptionRequest)
+	datas, err := service.FindFDatasByIndiceName(&exceptionRequest)
 	if nil != err {
 		global.GVA_LOG.Info("查询异常详细信息失败，请重试：", zap.Any("err", err))
 		response.FailWithMessage(fmt.Sprintf("获取失败，%v", err), c)

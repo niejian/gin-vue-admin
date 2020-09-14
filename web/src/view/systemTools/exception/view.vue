@@ -1,9 +1,10 @@
 <template>
 <!-- 聚合查询错误信息 -->
   <div>
+    <div>
     <el-form ref="form" >
       <el-form-item label="索引" label-width="200px">
-        <el-select v-model="value" placeholder="请选择" 
+        <el-select v-model="selectedIndexName" placeholder="请选择" 
           style="width:400px"
           size="medium" @change="indexChange">
           <el-option
@@ -16,68 +17,183 @@
         </el-select>
       </el-form-item>
     </el-form>
+    </div>
 
     <!-- 分割线 -->
     <el-divider></el-divider>
     <!-- 统计图展示区 -->
-    <div :class="className" :style="{height:height,width:width}" />
+    <div :class="className" :id="className" :style="{height:height,width:width}"></div>
+
+    <!-- 异常显示(折叠面板) -->
+    <!-- 新增角色弹窗 -->
+    <el-dialog :title="dialogTitle" :visible.sync="show" width="80%">
+      <div style="width:100%;height:100%">
+        
+        <el-collapse v-for="item in items" :key="item.exceptionTag">
+          <el-collapse-item >
+            <template slot="title">
+              <span style="color:red;font-size:20px">{{item.exceptionTag}}&nbsp;&nbsp;<i class="header-icon el-icon-question"></i></span>
+            </template>
+            <div v-html="item.msg"></div>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+
+    </el-dialog>
 
     
   </div>
+ 
 </template>
 
 <script>
 import {
-  getExceptionView
+  getExceptionView,
+  exceptionDetails,
+  indexException
 } from '@/api/exceptionView'
+
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 
 export default {
   props: {
-      className: {
-          type: String,
-          default: 'chart'
-      },
-      width: {
-          type: String,
-          default: '100%'
-      },
-      height: {
-          type: String,
-          default: '300px'
+    className: {
+      type: String,
+      default: 'chart'
+    },
+    width: {
+      type: String,
+      default: '100%'
+    },
+    height: {
+      type: String,
+      default: '400px'
+    },
+    option: {
+      type: Object,
+      default() {
+        return {}
       }
+    }
   },
   data() {
     return {
+      dialogTitle: '异常详情',
+      myChart: '',
+      items: [],
+      show: false,
+      chart: "",
       listApi: getExceptionView,
-      value: '',
       indexNames: [],
-      aggIndexs: []
-    }
-   
-  },
-  methods: {
-    indexChange(e, value){
-      debugger
-      console.log(e)
-      console.log(value)
-    },
-    // 图表初始化
-    initChart(){
-      this.chart = echarts.init(this.$el, 'light')
-      this.chart.setOption({
+      selectedIndexName: '',
+      aggIndexs: [],
+      exceptionTags: [],
+      // 柱状图点击时获取到的值
+      clickVal: '',
+      // echart模板数据
+      options: {
+        title: {
+          text: ''
+        },
         tooltip: {
-          trigger: 'axis',
-          axisPointer: { // 坐标轴指示器，坐标轴触发有效
-              type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
-          }
+          trigger: 'item'
         },
         legend: {
-          data: this.indexNames
+          data: [this.selectedIndexName]
         },
+        xAxis: {
+          name: '',
+          nameLocation: 'start',
+          nameGap: '50',
+          boundaryGap: true,
+          data: []
+        },
+        yAxis: { //纵轴标尺固定
+          type: 'value',
+          scale: true,
+          name: '数量',
+          min: 0,
+          boundaryGap: [0.2, 0.2]
+        },
+        series: [{
+          name: '数量',
+          type: 'bar',
+          data: []
+        }]
+      },
+      requestData: {
+        indexName: '',
+        exceptionTag: ''
+      }
+    } 
+  },
+  methods: {
+    indexChange(e){
+      // e --> indexName
+      this.options.title.text = e
+      this.requestData.indexName = e
+      // 初始化图表信息
+      // 通过索引名称获取错误信息
+      indexException(this.requestData).then((resp) => { 
+        if(resp.code == 0) {
+          this.aggIndexs = resp.data.aggIndexs
+          // 初始化横坐标-异常
+            this.options.xAxis.data = this.getXData(this.aggIndexs)
+            // 初始化纵坐标
+            this.options.series[0].data = this.getSeriesData(this.aggIndexs)
+            this.options.title.text = this.selectedIndexName
+            this.initChart()          
+        }
       })  
+    },
+   
+    // 获取横坐标信息
+    getXData(aggIndexs) {
+      let exs = []
+      aggIndexs.forEach(aggIndex => exs.push(aggIndex.key))
+      return exs
+    },
+    // 获取series.data信息
+    getSeriesData(aggIndexs){
+      let nums = []
+      aggIndexs.forEach(aggIndex => nums.push(aggIndex.docCount))
+      return nums
+    },
+    // 初始化图表信息
+    initChart() {
+      
+      // 初始化图表
+      this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
+      this.myChart.hideLoading();
+      // 图表设置数据
+      this.myChart.setOption(this.options)
+
+      // 处理点击事件并且跳转到相应的百度搜索页面
+      // params.name ==> 横坐标
+      this.myChart.on('click', (params) => {
+        this.clickVal = params.name
+        this.show = true
+        // showDetail()
+        this.showDetail()
+      })
+      
+    },
+     // 显示异常详情 
+    showDetail(){
+      this.requestData.indexName = this.selectedIndexName
+      this.requestData.exceptionTag = this.clickVal
+      
+      exceptionDetails(this.requestData).then((resp) => {
+        if (resp.code == 0) {
+          this.items = resp.data
+        }
+      })
     }
+  },
+ 
+  mounted() {
+    //chartChangeData()
   },
   async created () {
     // debugger
@@ -90,11 +206,31 @@ export default {
           this.indexNames = data.data.indexNames
           this.aggIndexs = data.data.aggIndexs
           if (this.indexNames) {
-            this.value = this.indexNames[0]
+            // this.chart = echarts.init(this.$el, 'light')
+            // let myChart = echarts.init(document.getElementById('chart'),'macarons');
+            this.selectedIndexName = this.indexNames[0]
+            // 初始化横坐标-异常
+            this.options.xAxis.data = this.getXData(this.aggIndexs)
+            // 初始化纵坐标
+            this.options.series[0].data = this.getSeriesData(this.aggIndexs)
+            this.options.title.text = this.selectedIndexName
+            
+            // 初始化图表
+            this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
+            // 图表设置数据
+            this.myChart.setOption(this.options)
+            // 点击事件
+            this.myChart.on('click', (params) => {
+              this.clickVal = params.name
+              this.show = true
+              // showDetail()
+              this.showDetail()
+            })
+
           }
 
         }                                     
-8    })  
+    })  
   }
 }
 </script>

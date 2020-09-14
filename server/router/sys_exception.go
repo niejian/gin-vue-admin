@@ -7,7 +7,8 @@ import (
 )
 
 func InitExceptionViewRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
-	ExceptionViewRouter := Router.Group("exception").
+	ExceptionViewRouter := Router.
+		Group("exception").
 		Use(middleware.JWTAuth()).
 		Use(middleware.CasbinHandler())
 
@@ -15,8 +16,10 @@ func InitExceptionViewRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
 		// 添加路由信息
 		// 1. 获取预览信息
 		ExceptionViewRouter.POST("viewException", v1.GetExceptionView)
-		// 2. 获取异常详细信息
-		ExceptionViewRouter.POST("exceptionDetails")
+		// 2. 通过索引名、字段名获取异常详细信息
+		ExceptionViewRouter.POST("exceptionDetails", v1.GetExceptionDetails)
+		// 3. 通过索引名获取信息
+		ExceptionViewRouter.POST("indexException", v1.GetExceptionViewByIndexName)
 	}
 
 	return ExceptionViewRouter

@@ -64,6 +64,7 @@ export default {
         TodoList //TodoList
     },
   mounted() {
+    
       let myChart = echarts.init(document.getElementById('main'),'macarons');
       // let stackMap = echarts.init(document.getElementById('stackMap'));
       let  option = {
