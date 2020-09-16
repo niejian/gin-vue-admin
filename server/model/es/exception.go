@@ -9,4 +9,8 @@ type Exception struct {
 	ExceptionTag string `json:"exceptionTag"`
 	From         string `json:"from"`
 	Msg          string `json:"msg"`
+	Year         string `json:"year"`
+	Month        string `json:"month"`
+	Day          string `json:"day"`
+	CreateDate   string `json:"createDate"` //20200916
 }

@@ -10,9 +10,39 @@ import (
 	"gin-vue-admin/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"time"
 )
 
-const INDEX_PREFIX = "watchdog_store_"
+const (
+	INDEX_PREFIX    = "watchdog_store_"
+	FormatStartTime = "20060102"
+)
+
+// @Tags GetExceptionOverview
+// @Summary 获取异常的x天内的报表信息
+// @Security ApiKeyAuth
+// @Produce  application/json
+// @Param data body request.RegisterAndLoginStruct true "可以什么都不填"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"返回成功"}"
+// @Router /exception/view [post]
+func GetExceptionOverview(c *gin.Context) {
+	// 获取所有相关的索引信息
+	names, err := service.FindAppIndex(INDEX_PREFIX)
+	if err != nil {
+		global.GVA_LOG.Error("获取索引失败：", zap.Any("err", err))
+		response.FailWithMessage(fmt.Sprintf("获取失败，%v", err), c)
+	} else {
+		if len(names) > 0 {
+			// 初始化页面
+			initIndexName := names[0]
+			fmt.Printf("initIndexName %v \n", initIndexName)
+			// 聚合查询错误列表信息
+			aggIndexs := service.GetExceptionOverview(initIndexName, 30)
+			response.OkWithData(resp.IndexNameResponse{IndexNames: names, AggIndexs: aggIndexs}, c)
+
+		}
+	}
+}
 
 // @Tags GetExceptionView
 // @Summary 获取异常视图信息
@@ -33,7 +63,7 @@ func GetExceptionView(c *gin.Context) {
 			initIndexName := names[0]
 			fmt.Printf("initIndexName %v \n", initIndexName)
 			// 聚合查询错误列表信息
-			aggIndexs := service.IndexOverview(initIndexName)
+			aggIndexs := service.IndexOverview(initIndexName, time.Now().Format(FormatStartTime))
 
 			response.OkWithData(resp.IndexNameResponse{IndexNames: names, AggIndexs: aggIndexs}, c)
 
@@ -42,12 +72,13 @@ func GetExceptionView(c *gin.Context) {
 
 }
 
-func GetExceptionViewByIndexName(c *gin.Context) {
+func GetExceptionDailyViewByIndexName(c *gin.Context) {
 	var requestData request.GetExceptionOverviewByIndexNameStruct
 	c.ShouldBindJSON(&requestData)
 	// 校验请求参数是否为空
 	rules := utils.Rules{
-		"IndexName": {utils.NotEmpty()},
+		"IndexName":  {utils.NotEmpty()},
+		"CreateDate": {utils.NotEmpty()},
 	}
 
 	verifyErr := utils.Verify(requestData, rules)
@@ -56,7 +87,7 @@ func GetExceptionViewByIndexName(c *gin.Context) {
 		return
 	}
 	// 聚合查询错误列表信息
-	aggIndexs := service.IndexOverview(requestData.IndexName)
+	aggIndexs := service.IndexOverview(requestData.IndexName, requestData.CreateDate)
 
 	response.OkWithData(resp.AggIndexResponse{AggIndexs: aggIndexs}, c)
 
@@ -77,6 +108,7 @@ func GetExceptionDetails(c *gin.Context) {
 	exceptionValid := utils.Rules{
 		"IndexName":    {utils.NotEmpty()},
 		"ExceptionTag": {utils.NotEmpty()},
+		"CreateDate":   {utils.NotEmpty()},
 	}
 
 	exceptionVerifyErr := utils.Verify(exceptionRequest, exceptionValid)

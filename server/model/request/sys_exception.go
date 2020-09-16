@@ -4,9 +4,11 @@ package request
 type GetExceptionDetailStruct struct {
 	IndexName    string `json:"indexName"`
 	ExceptionTag string `json:"exceptionTag"`
+	CreateDate   string `json:"createDate"`
 }
 
 // 根据索引名获取异常信息
 type GetExceptionOverviewByIndexNameStruct struct {
-	IndexName string `json:"indexName"`
+	IndexName  string `json:"indexName"`
+	CreateDate string `json:"createDate"`
 }

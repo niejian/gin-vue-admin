@@ -1,5 +1,5 @@
 <template>
-<!-- 聚合查询错误信息 -->
+<!-- 近30天的错误信息 -->
   <div>
     <div>
     <el-form ref="form" >
@@ -26,13 +26,17 @@
 
     <!-- 异常显示(折叠面板) -->
     <!-- 新增角色弹窗 -->
-    <el-dialog :title="dialogTitle" :visible.sync="show" width="80%">
+    <el-dialog :title="dialogTitle" :visible.sync="show" width="80%" @close="closeDetail">
       <div style="width:100%;height:100%">
         
-        <el-collapse v-for="item in items" :key="item.exceptionTag">
+        <el-collapse v-for="item in items" :key="item.id">
           <el-collapse-item >
             <template slot="title">
-              <span style="color:red;font-size:20px">{{item.exceptionTag}}&nbsp;&nbsp;<i class="header-icon el-icon-question"></i></span>
+              <span style="color:gray;font-size:20px">{{item.createDate}}</span>-
+              <span style="color:green;font-size:20px">{{item.ip}}</span>-
+              <span style="color:red;font-size:20px">{{item.exceptionTag}}</span>
+                &nbsp;&nbsp;
+                <i class="header-icon el-icon-question"></i>
             </template>
             <div v-html="item.msg"></div>
           </el-collapse-item>
@@ -48,6 +52,7 @@
 
 <script>
 import {
+  getExceptionOverview,
   getExceptionView,
   exceptionDetails,
   indexException
@@ -80,6 +85,7 @@ export default {
   data() {
     return {
       dialogTitle: '异常详情',
+      createDate: '',
       myChart: '',
       items: [],
       show: false,
@@ -124,7 +130,8 @@ export default {
       },
       requestData: {
         indexName: '',
-        exceptionTag: ''
+        exceptionTag: '',
+        createDate: ''
       }
     } 
   },
@@ -133,19 +140,10 @@ export default {
       // e --> indexName
       this.options.title.text = e
       this.requestData.indexName = e
+      this.requestData.createDate = this.createDate
       // 初始化图表信息
       // 通过索引名称获取错误信息
-      indexException(this.requestData).then((resp) => { 
-        if(resp.code == 0) {
-          this.aggIndexs = resp.data.aggIndexs
-          // 初始化横坐标-异常
-            this.options.xAxis.data = this.getXData(this.aggIndexs)
-            // 初始化纵坐标
-            this.options.series[0].data = this.getSeriesData(this.aggIndexs)
-            this.options.title.text = this.selectedIndexName
-            this.initChart()          
-        }
-      })  
+      this.showExceptionOverview() 
     },
    
     // 获取横坐标信息
@@ -162,46 +160,58 @@ export default {
     },
     // 初始化图表信息
     initChart() {
-      
       // 初始化图表
       this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
       this.myChart.hideLoading();
       // 图表设置数据
       this.myChart.setOption(this.options)
-
-      // 处理点击事件并且跳转到相应的百度搜索页面
       // params.name ==> 横坐标
       this.myChart.on('click', (params) => {
         this.clickVal = params.name
-        this.show = true
-        // showDetail()
         this.showDetail()
-      })
-      
+        //this.createDate = params.name
+        //this.showDailyException()
+      })    
+    },
+    // 显示选择的异常详细
+    showDailyException(){
+      this.show = false
+      let data = {
+        createDate: this.createDate,
+        indexName: this.selectedIndexName
+      }
+      // 通过点击获取到创建时间和此时选中的索引名称
+      indexException(data).then((resp) => { 
+        if(resp.code == 0) {
+          this.aggIndexs = resp.data.aggIndexs
+          // 初始化横坐标-异常
+          this.options.xAxis.data = this.getXData(this.aggIndexs)
+          // 初始化纵坐标
+          this.options.series[0].data = this.getSeriesData(this.aggIndexs)
+          // 改变表头
+          this.options.title.text = this.selectedIndexName + ":" + this.createDate
+          this.initChart()          
+        }
+      });
     },
      // 显示异常详情 
     showDetail(){
+      this.show = true
       this.requestData.indexName = this.selectedIndexName
       this.requestData.exceptionTag = this.clickVal
-      
+      this.requestData.createDate = this.createDate
+
       exceptionDetails(this.requestData).then((resp) => {
         if (resp.code == 0) {
           this.items = resp.data
         }
       })
-    }
-  },
- 
-  mounted() {
-    //chartChangeData()
-  },
-  async created () {
-    // debugger
-    // 获取异步执行后的结果
-    getExceptionView().then((data) => {
+    },
+    // 预览
+    showExceptionOverview(){
+      getExceptionOverview().then((data) => {
         // 请求成功
         if(data.code == 0) {
-          
           // responseData = data.data
           this.indexNames = data.data.indexNames
           this.aggIndexs = data.data.aggIndexs
@@ -220,15 +230,62 @@ export default {
             // 图表设置数据
             this.myChart.setOption(this.options)
             // 点击事件
-            this.myChart.on('click', (params) => {
-              this.clickVal = params.name
-              this.show = true
-              // showDetail()
-              this.showDetail()
+            this.myChart.on('click', (params) => {              
+              if (isNaN(params.name) == false) {
+                  this.createDate = params.name
+              }  
+              this.showDailyException()
             })
 
           }
+        }                                     
+      })
+    },
+    closeDetail() {
+      this.show = false
+      // 清空相关数据
+      this.items = []
+      this.options.title.text = ''
 
+      this.indexChange(this.selectedIndexName)
+    }
+  },
+ 
+  created() {
+    //chartChangeData()
+  },
+  async mounted () {
+    // debugger
+    // 获取异步执行后的结果    
+    getExceptionOverview().then((data) => {
+        // 请求成功
+        if(data.code == 0) {
+          // responseData = data.data
+          this.indexNames = data.data.indexNames
+          this.aggIndexs = data.data.aggIndexs
+          if (this.indexNames) {
+            // this.chart = echarts.init(this.$el, 'light')
+            // let myChart = echarts.init(document.getElementById('chart'),'macarons');
+            this.selectedIndexName = this.indexNames[0]
+            // 初始化横坐标-异常
+            this.options.xAxis.data = this.getXData(this.aggIndexs)
+            // 初始化纵坐标
+            this.options.series[0].data = this.getSeriesData(this.aggIndexs)
+            this.options.title.text = this.selectedIndexName
+            
+            // 初始化图表
+            this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
+            // 图表设置数据
+            this.myChart.setOption(this.options)
+            // 点击事件
+            this.myChart.on('click', (params) => {              
+              if (isNaN(params.name) == false) {
+                  this.createDate = params.name
+              }  
+              this.showDailyException()
+            })
+
+          }
         }                                     
     })  
   }

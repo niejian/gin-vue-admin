@@ -1,6 +1,16 @@
 import service from '@/utils/request'
 
 // 
+// @Summary 异常汇总列表
+// @Produce  application/json
+// @Router /exception/exceptionOverview [post]
+export const getExceptionOverview = () => {
+  return service({
+    url: "/exception/exceptionOverview",
+    method: 'post',
+  })
+}
+// 
 // @Summary 预览异常统计信息
 // @Produce  application/json
 // @Router /exception/viewException [post]
