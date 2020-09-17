@@ -29,18 +29,48 @@ func InitWatchdogEnv(envStruct *request.InitWatchDogEnvStruct) (string, error) {
 
 	defer session.Close()
 	pwd, _ := os.Getwd()
-	if nil != err && "" != resMsg {
-		shellCmd := fmt.Sprintf("%s%s%s%s%s%s%s%s%d%s%s", pwd, "/resources/shell/scp.sh ", username, " ", ip, " ", password, " ", port, " ", remoteFilePath)
-		// 本地运行scp命令
-		command := exec.Command("/bin/bash", "-c", shellCmd)
-		rep, err := command.CombinedOutput()
 
-		if nil != err {
-			resMsg = err.Error()
-			global.GVA_LOG.Error("运行scp:" + shellCmd + ", 返回 " + string(rep))
-			return "", err
-		}
+	shellCmd := fmt.Sprintf("%s%s%s%s%s%s%s%s%d%s%s", pwd, "/resource/shell/scp.sh ", username,
+		" ", ip, " ", password, " ", port, " ", remoteFilePath)
+	// 本地运行scp命令
+	command := exec.Command("/bin/bash", "-c", shellCmd)
+	rep, err := command.CombinedOutput()
+
+	if nil != err {
+		resMsg = err.Error()
+		global.GVA_LOG.Error("运行scp:" + shellCmd + ", 返回 " + string(rep))
+		return err.Error(), err
 	}
-	return "", err
+
+	global.GVA_LOG.Info("scp 结果：", zap.Any("scp", string(rep)))
+
+	global.GVA_LOG.Info("init 当前路径：", zap.String("init-path", pwd))
+	err = utils.DoPathscp(username, password, ip, pwd+"/resource/shell/init.sh", remoteFilePath, port)
+	if err != nil {
+		resMsg = "请检查账号、密码、端口是否正确"
+		global.GVA_LOG.Error("请检查账号、密码、端口是否正确")
+		return err.Error(), err
+	}
+
+	session, err = utils.DoSshConnect(username, password, ip, int(port))
+	if err != nil {
+		resMsg = "请检查账号、密码、端口是否正确"
+		global.GVA_LOG.Error("请检查账号、密码、端口是否正确")
+		return err.Error(), err
+	}
+
+	defer session.Close()
+
+	cmd := remoteFilePath + "/init.sh " + remoteFilePath + " >" + remoteFilePath + "/init.log"
+	global.GVA_LOG.Info("开始运行 init.sh 脚本", zap.Any("cmd", cmd))
+	out, err := session.CombinedOutput(cmd)
+	if nil != err {
+		global.GVA_LOG.Error("运行 init.sh 脚本失败", zap.Any("err", err))
+		resMsg = err.Error()
+	} else {
+		global.GVA_LOG.Info("运行 init.sh 脚本成功，结果：", zap.Any("out", out))
+		resMsg = ""
+	}
+	return resMsg, err
 
 }

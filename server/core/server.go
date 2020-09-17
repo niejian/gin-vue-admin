@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin-vue-admin/global"
 	"gin-vue-admin/initialize"
+	"github.com/gin-contrib/static"
 	"go.uber.org/zap"
 	"time"
 )
@@ -25,6 +26,8 @@ func RunWindowsServer() {
 
 	Router := initialize.Routers()
 	Router.Static("/form-generator", "./resource/page")
+	Router.Use(static.Serve("/fe", static.LocalFile("./fe", false)))
+	Router.Static("/static", "./fe/static")
 
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
 	s := initServer(address, Router)

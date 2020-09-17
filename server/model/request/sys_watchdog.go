@@ -5,6 +5,6 @@ type InitWatchDogEnvStruct struct {
 	Ip             string `json:"ip"`
 	Username       string `json:"username"`
 	Password       string `json:"password"`
-	Port           int64  `json:"port"`
+	Port           int    `json:"port"`
 	RemoteFilePath string `json:"remoteFilePath"`
 }

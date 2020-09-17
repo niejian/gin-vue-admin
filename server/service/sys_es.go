@@ -118,14 +118,18 @@ func IndexOverview(indexName, createDate string) []es.AggIndex {
 func FindFDatasByIndiceName(queryExceptionRequest *request.GetExceptionDetailStruct) ([]es.Exception, error) {
 	var exs []es.Exception
 	ctx := context.Background()
-	query1 := elastic.NewTermQuery(EXCEPTION_TAG, queryExceptionRequest.ExceptionTag)
-	query2 := elastic.NewTermQuery(CREATEDATE, queryExceptionRequest.CreateDate)
+	queryExceptionTag := elastic.NewTermQuery(EXCEPTION_TAG, queryExceptionRequest.ExceptionTag)
+
+	queryCreateDate := elastic.NewTermQuery(CREATEDATE, queryExceptionRequest.CreateDate)
+	// 组合条件查询
+	query := elastic.NewBoolQuery().Must(queryExceptionTag, queryCreateDate)
+
 	searchResult, err := global.
 		GVA_ES.Search(queryExceptionRequest.IndexName).
-		Query(query1).
-		Query(query2).
+		Query(query).
 		Sort("id", true).
 		From(0).
+		Size(10000).
 		Do(ctx)
 	if nil != err {
 		global.GVA_LOG.Info("查询失败：", zap.Any("err", err))

@@ -4,10 +4,11 @@ import service from '@/utils/request'
 // @Summary 异常汇总列表
 // @Produce  application/json
 // @Router /exception/exceptionOverview [post]
-export const getExceptionOverview = () => {
+export const getExceptionOverview = (data) => {
   return service({
     url: "/exception/exceptionOverview",
     method: 'post',
+    data
   })
 }
 // 

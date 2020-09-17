@@ -26,21 +26,30 @@ const (
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"返回成功"}"
 // @Router /exception/view [post]
 func GetExceptionOverview(c *gin.Context) {
+	var requestData request.GetExceptionOverviewByIndexNameStruct
 	// 获取所有相关的索引信息
 	names, err := service.FindAppIndex(INDEX_PREFIX)
+	c.ShouldBindJSON(&requestData)
+	indexName := requestData.IndexName
+	var initIndexName string = ""
 	if err != nil {
 		global.GVA_LOG.Error("获取索引失败：", zap.Any("err", err))
 		response.FailWithMessage(fmt.Sprintf("获取失败，%v", err), c)
 	} else {
-		if len(names) > 0 {
-			// 初始化页面
-			initIndexName := names[0]
-			fmt.Printf("initIndexName %v \n", initIndexName)
-			// 聚合查询错误列表信息
-			aggIndexs := service.GetExceptionOverview(initIndexName, 30)
-			response.OkWithData(resp.IndexNameResponse{IndexNames: names, AggIndexs: aggIndexs}, c)
 
+		if len(names) > 0 && "" != indexName {
+			// 初始化页面
+			initIndexName = indexName
+		} else if len(names) > 0 && "" == indexName {
+			initIndexName = names[0]
 		}
+
+		// 初始化页面
+		global.GVA_LOG.Info("初始化异常报表页面：", zap.Any("indexName", initIndexName))
+		// 聚合查询错误列表信息
+		aggIndexs := service.GetExceptionOverview(initIndexName, 30)
+		response.OkWithData(resp.IndexNameResponse{IndexNames: names, AggIndexs: aggIndexs}, c)
+
 	}
 }
 

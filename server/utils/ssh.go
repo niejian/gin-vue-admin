@@ -180,7 +180,7 @@ func DoPathscp(username, password, host,
 	)
 
 	// ssh建立连接
-	sftpClient, err = doSftpConnect(username, password, host, port)
+	sftpClient, err = doSftpConnect(username, password, host, int(port))
 	if err != nil {
 		log.Printf("对目标主机 %v建立连接失败\n", host)
 		return err
@@ -195,7 +195,7 @@ func DoPathscp(username, password, host,
 	defer src.Close()
 	// 远程创建文件夹
 
-	session, err := DoSshConnect(username, password, host, port)
+	session, err := DoSshConnect(username, password, host, int(port))
 	if err != nil {
 		log.Printf("ssh: %v失败 ", localFilePath)
 		return err

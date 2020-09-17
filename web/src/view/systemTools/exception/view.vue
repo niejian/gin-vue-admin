@@ -84,9 +84,10 @@ export default {
   },
   data() {
     return {
+      queryFlag: false,
       dialogTitle: '异常详情',
       createDate: '',
-      myChart: '',
+      myChart: null,
       items: [],
       show: false,
       chart: "",
@@ -138,12 +139,13 @@ export default {
   methods: {
     indexChange(e){
       // e --> indexName
+      this.selectedIndexName = e
       this.options.title.text = e
       this.requestData.indexName = e
       this.requestData.createDate = this.createDate
       // 初始化图表信息
       // 通过索引名称获取错误信息
-      this.showExceptionOverview() 
+      this.showExceptionOverview(this.selectedIndexName) 
     },
    
     // 获取横坐标信息
@@ -158,20 +160,27 @@ export default {
       aggIndexs.forEach(aggIndex => nums.push(aggIndex.docCount))
       return nums
     },
-    // 初始化图表信息
+    // 显示某天的异常图表信息
     initChart() {
       // 初始化图表
+
       this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
-      this.myChart.hideLoading();
+      this.myChart.off('click')
+      //this.myChart.hideLoading();
       // 图表设置数据
       this.myChart.setOption(this.options)
+      
       // params.name ==> 横坐标
       this.myChart.on('click', (params) => {
+        
         this.clickVal = params.name
-        this.showDetail()
-        //this.createDate = params.name
-        //this.showDailyException()
-      })    
+        if (isNaN(this.clickVal) && !this.queryFlag) {
+          this.showDetail()
+        }else {
+          //console.log("显示错误详情：exception", this.clickVal)
+        }      
+       
+      })
     },
     // 显示选择的异常详细
     showDailyException(){
@@ -190,35 +199,40 @@ export default {
           this.options.series[0].data = this.getSeriesData(this.aggIndexs)
           // 改变表头
           this.options.title.text = this.selectedIndexName + ":" + this.createDate
-          this.initChart()          
+          this.initChart()   
         }
       });
     },
      // 显示异常详情 
-    showDetail(){
-      this.show = true
+    showDetail(){      
       this.requestData.indexName = this.selectedIndexName
       this.requestData.exceptionTag = this.clickVal
       this.requestData.createDate = this.createDate
-
+      this.items = []
+      
       exceptionDetails(this.requestData).then((resp) => {
+        this.show = true
         if (resp.code == 0) {
           this.items = resp.data
+          
+          this.dialogTitle = resp.data[0].appName +' ：异常详情'
         }
       })
     },
     // 预览
-    showExceptionOverview(){
-      getExceptionOverview().then((data) => {
+    showExceptionOverview(indexName){
+      getExceptionOverview({indexName: indexName}).then((data) => {
+        //debugger
         // 请求成功
         if(data.code == 0) {
           // responseData = data.data
+          // 重新获取到所有的索引名称
           this.indexNames = data.data.indexNames
           this.aggIndexs = data.data.aggIndexs
           if (this.indexNames) {
-            // this.chart = echarts.init(this.$el, 'light')
-            // let myChart = echarts.init(document.getElementById('chart'),'macarons');
-            this.selectedIndexName = this.indexNames[0]
+            this.myChart = echarts.init(document.getElementById('chart'),'macarons');
+            this.myChart.off('click')
+            this.selectedIndexName = indexName
             // 初始化横坐标-异常
             this.options.xAxis.data = this.getXData(this.aggIndexs)
             // 初始化纵坐标
@@ -226,15 +240,16 @@ export default {
             this.options.title.text = this.selectedIndexName
             
             // 初始化图表
-            this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
+            // this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
             // 图表设置数据
             this.myChart.setOption(this.options)
             // 点击事件
             this.myChart.on('click', (params) => {              
               if (isNaN(params.name) == false) {
                   this.createDate = params.name
-              }  
-              this.showDailyException()
+                  this.showDailyException()
+              } 
+              
             })
 
           }
@@ -243,18 +258,14 @@ export default {
     },
     closeDetail() {
       this.show = false
+      this.queryFlag = false
       // 清空相关数据
       this.items = []
       this.options.title.text = ''
-
-      this.indexChange(this.selectedIndexName)
+      this.showDailyException()
     }
   },
- 
-  created() {
-    //chartChangeData()
-  },
-  async mounted () {
+  async created () {
     // debugger
     // 获取异步执行后的结果    
     getExceptionOverview().then((data) => {
@@ -275,6 +286,7 @@ export default {
             
             // 初始化图表
             this.myChart = echarts.init(document.getElementById('chart'), 'macarons')
+            this.myChart.off('click')
             // 图表设置数据
             this.myChart.setOption(this.options)
             // 点击事件

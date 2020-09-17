@@ -49,7 +49,8 @@ redis:
 # system configuration
 system:
   use-multipoint: false
-  env: 'public'  # Change to "develop" to skip authentication for development mode
+#  env: 'public'  # Change to "develop" to skip authentication for development mode
+  env: 'develop'  # Change to "develop" to skip authentication for development mode
   addr: 8888
   db-type: "mysql"  # support mysql/sqlite
   need-init-data: false
@@ -57,7 +58,7 @@ system:
 
 # captcha configuration
 captcha:
-  key-long: 6
+  key-long: 1
   img-width: 240
   img-height: 80
 
