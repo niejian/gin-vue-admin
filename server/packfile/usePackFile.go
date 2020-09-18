@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-//go:generate go-bindata -o=staticFile.go -pkg=packfile -tags=packfile ../resource/... ../config.yaml
+//go:generate go-bindata -o=staticFile.go -pkg=packfile -tags=packfile ../resource/... ../config.yaml ../fe/...
 
 func writeFile(path string, data []byte) {
 	// 如果文件夹不存在，预先创建文件夹

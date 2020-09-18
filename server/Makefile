@@ -1,8 +1,11 @@
 .PHONY: all build run gotool clean help
-BINARY=gin-vue-admin
+BINARY=gva-server
 all: gotool  build
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  -o ${BINARY}
+	# 将静态文件打包到二进制文件中
+	go generate -tags=packfile ./packfile/usePackFile.go
+	#CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  -o ${BINARY}
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags=packfile  -o ${BINARY}
 clean:
 	@if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
 run:
