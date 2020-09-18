@@ -2,8 +2,8 @@
 <!-- 近30天的错误信息 -->
   <div>
     <div>
-    <el-form ref="form" >
-      <el-form-item label="索引" label-width="200px">
+    <el-form ref="form" :inline="true">
+      <el-form-item label="索引" label-width="100px">
         <el-select v-model="selectedIndexName" filterable placeholder="请选择" 
           style="width:400px"
           size="medium" @change="indexChange">
@@ -15,6 +15,17 @@
             >
           </el-option>
         </el-select>
+      </el-form-item>
+      <el-form-item label="查询时间（天）" label-width="200px">
+        <div>
+          <el-radio-group v-model="days" @change="daysChange">
+            <el-radio-button label="30"></el-radio-button>
+            <el-radio-button label="20"></el-radio-button>
+            <el-radio-button label="10"></el-radio-button>
+            <el-radio-button label="3"></el-radio-button>
+            <el-radio-button label="1"></el-radio-button>
+          </el-radio-group>
+        </div>
       </el-form-item>
     </el-form>
     </div>
@@ -84,6 +95,7 @@ export default {
   },
   data() {
     return {
+      days: 30,
       queryFlag: false,
       dialogTitle: '异常详情',
       createDate: '',
@@ -137,15 +149,19 @@ export default {
     } 
   },
   methods: {
+    daysChange(e){
+      this.showExceptionOverview(this.selectedIndexName, e) 
+    },
     indexChange(e){
       // e --> indexName
+      this.days = 30
       this.selectedIndexName = e
       this.options.title.text = e
       this.requestData.indexName = e
       this.requestData.createDate = this.createDate
       // 初始化图表信息
       // 通过索引名称获取错误信息
-      this.showExceptionOverview(this.selectedIndexName) 
+      this.showExceptionOverview(this.selectedIndexName, this.days) 
     },
    
     // 获取横坐标信息
@@ -220,8 +236,8 @@ export default {
       })
     },
     // 预览
-    showExceptionOverview(indexName){
-      getExceptionOverview({indexName: indexName}).then((data) => {
+    showExceptionOverview(indexName, days){
+      getExceptionOverview({indexName: indexName, days: days}).then((data) => {
         //debugger
         // 请求成功
         if(data.code == 0) {
@@ -248,10 +264,8 @@ export default {
               if (isNaN(params.name) == false) {
                   this.createDate = params.name
                   this.showDailyException()
-              } 
-              
+              }              
             })
-
           }
         }                                     
       })

@@ -26,5 +26,6 @@ go.sum
 /server/log/
 /server/latest_log
 /server/gin-vue-admin
-/server/gin-server
+/server/gva-server
+/server/packfile/usePackFile.go
 *.iml

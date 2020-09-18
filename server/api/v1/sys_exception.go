@@ -10,6 +10,7 @@ import (
 	"gin-vue-admin/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"strconv"
 	"time"
 )
 
@@ -31,6 +32,14 @@ func GetExceptionOverview(c *gin.Context) {
 	names, err := service.FindAppIndex(INDEX_PREFIX)
 	c.ShouldBindJSON(&requestData)
 	indexName := requestData.IndexName
+	daysStr := requestData.Days
+	days := 30
+	if "" != daysStr {
+		// 转换机器
+		i, _ := strconv.ParseInt(daysStr, 10, 32)
+		days = int(i)
+	}
+
 	var initIndexName string = ""
 	if err != nil {
 		global.GVA_LOG.Error("获取索引失败：", zap.Any("err", err))
@@ -45,9 +54,11 @@ func GetExceptionOverview(c *gin.Context) {
 		}
 
 		// 初始化页面
-		global.GVA_LOG.Info("初始化异常报表页面：", zap.Any("indexName", initIndexName))
+		global.GVA_LOG.Info("初始化异常报表页面：",
+			zap.Any("indexName", initIndexName),
+			zap.Any("days", days))
 		// 聚合查询错误列表信息
-		aggIndexs := service.GetExceptionOverview(initIndexName, 30)
+		aggIndexs := service.GetExceptionOverview(initIndexName, days)
 		response.OkWithData(resp.IndexNameResponse{IndexNames: names, AggIndexs: aggIndexs}, c)
 
 	}

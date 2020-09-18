@@ -72,14 +72,14 @@
         this.$refs[formName].validate((valid) => {
           
           if (valid) {
-            debugger
-            this.initRuleForm.port = this.numberValidateForm.port
-            this.doInit()
+            if (formName == 'init')
+              this.initRuleForm.port = this.numberValidateForm.port
+              this.doInitEnv()
             
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
+            } else {
+              console.log('error submit!!');
+              return false;
+            }
         });
       },
       handleClick(tab, event) {
@@ -92,10 +92,16 @@
           this.configShow = true
         }
       },
-      doInit() {
+      doInitEnv() {
         this.initRuleForm.port = this.numberValidateForm.port
         initEnv(this.initRuleForm).then((resp) => {
-          
+          if (resp.code == 0) {
+            // 初始化成功
+            this.$message({
+              message: '初始化成功',
+              type: 'success'
+            });
+          }
         })
       }
     }

@@ -11,4 +11,5 @@ type GetExceptionDetailStruct struct {
 type GetExceptionOverviewByIndexNameStruct struct {
 	IndexName  string `json:"indexName"`
 	CreateDate string `json:"createDate"`
+	Days       string `json:"days"`
 }
