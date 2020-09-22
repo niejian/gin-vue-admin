@@ -28,6 +28,7 @@ func RunWindowsServer() {
 	Router.Static("/form-generator", "./resource/page")
 	Router.Use(static.Serve("/fe", static.LocalFile("./fe", false)))
 	Router.Static("/static", "./fe/static")
+	//Router.POST("/watchdog/downloadConfig", v1.DownloadConfig)
 
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
 	s := initServer(address, Router)

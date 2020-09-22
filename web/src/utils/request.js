@@ -30,6 +30,7 @@ const closeLoading = () => {
     //http request 拦截器
 service.interceptors.request.use(
     config => {
+      
         showLoading()
         const token = store.getters['user/token']
         const user = store.getters['user/userInfo']
@@ -42,6 +43,7 @@ service.interceptors.request.use(
         return config;
     },
     error => {
+      
         closeLoading()
         Message({
             showClose: true,
@@ -60,19 +62,29 @@ service.interceptors.response.use(
         if (response.headers["new-token"]) {
             store.commit('user/setToken', response.headers["new-token"])
         }
-        if (response.data.code == 0 || response.headers.success === "true") {
+        // 判断是否为下载文件地址s 
+        if (response.config.url.indexOf ("watchdog/downloadConfig") < 0) {
+          
+          if (response.data.code == 0 || response.headers.success === "true") {
             return response.data
+          } else {
+              Message({
+                  showClose: true,
+                  message: response.data.msg || decodeURI(response.headers.msg),
+                  type: 'error',
+              })
+              if (response.data.data && response.data.data.reload) {
+                  store.commit('user/LoginOut')
+              }
+              return Promise.reject(response.data.msg)
+          }
         } else {
-            Message({
-                showClose: true,
-                message: response.data.msg || decodeURI(response.headers.msg),
-                type: 'error',
-            })
-            if (response.data.data && response.data.data.reload) {
-                store.commit('user/LoginOut')
-            }
-            return Promise.reject(response.data.msg)
+          response.config.headers={
+            "content-type":"application/octet-stream"
+          }
+          return response
         }
+        
     },
     error => {
         closeLoading()

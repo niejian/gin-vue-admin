@@ -74,3 +74,21 @@ func InitWatchdogEnv(envStruct *request.InitWatchDogEnvStruct) (string, error) {
 	return resMsg, err
 
 }
+
+// 复制配置文件到本机器
+func CopyConfig(requestData request.ConfigWatchDogEnvStruct, filename string) error {
+	pwd, _ := os.Getwd()
+	shellCmd := fmt.Sprintf("%s%s%s%s%s%s%s%s%d%s%s%s", pwd, "/resource/shell/copyconfig.sh ", requestData.CUsername,
+		" ", requestData.CIp, " ", requestData.CPassword, " ", requestData.CPort, " ", requestData.CRemoteFilePath, " "+filename)
+
+	// 本地运行scp命令
+	command := exec.Command("/bin/bash", "-c", shellCmd)
+	rep, err := command.CombinedOutput()
+
+	if nil != err {
+		global.GVA_LOG.Error("运行copy:" + shellCmd + ", 返回 " + string(rep))
+		return err
+	}
+
+	return nil
+}

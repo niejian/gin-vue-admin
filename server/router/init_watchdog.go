@@ -13,6 +13,9 @@ func InitWatchdogRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
 		Use(middleware.CasbinHandler())
 	{
 		WatchdogRouter.POST("/init", v1.WatchDogEnvInit)
+		WatchdogRouter.POST("/try2Connect", v1.Try2Connect)
+		WatchdogRouter.POST("/downloadConfig", v1.DownloadConfig)
+		WatchdogRouter.POST("/upload", v1.DownloadConfig)
 
 	}
 

@@ -1,0 +1,23 @@
+logPaths:
+  # demo-muti-registry-producer-2020-06-19.log, demo-muti-registry-producer-20200619.log
+  - /data/server/website/node_8081/logs/
+  - /data/server/website/node_8082/logs/
+  - /data/server/springBoot/catalina.out
+emails:
+  - xiaolizhi@bluemoon.com.cn
+userIds:
+  #- 80486943
+  - 80468295
+  #- 80450049
+errs:
+  - GlobalException
+  - OverlappingFileLockException
+  - ArithmeticException
+  - IndexOutOfBoundsException
+  - UnknownHostException
+  - ConnectException
+  - AxisFault
+  - IndexOutOfBoundsException
+  - NullPointerException
+  - AxisFault
+enable: true

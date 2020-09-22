@@ -33,6 +33,8 @@ Vue.use(mavonEditor)
 
 import '@/permission'
 import { store } from '@/store/index'
+
+import 'xterm/dist/xterm.css'
 Vue.config.productionTip = false
 
 // 路由守卫

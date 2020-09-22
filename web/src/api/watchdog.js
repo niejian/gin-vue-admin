@@ -10,3 +10,27 @@ export const initEnv = (data) => {
     data
   })
 }
+
+export const try2Connect = (data) => {
+  return service({
+    url: "/watchdog/try2Connect",
+    method: 'post',
+    data
+  })
+}
+
+export const sshService = () => {
+  return service({
+    url: "/ws/:id",
+    method: 'get'
+  })
+}
+
+// 下载配置文件
+export const downloadConfig = (data) => {
+  return service({
+    url: "/watchdog/downloadConfig",
+    method: 'POST',
+    data
+  })
+}
