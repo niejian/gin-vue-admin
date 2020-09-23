@@ -115,7 +115,7 @@ export default {
       curYear: 0,
       lock: "lock",
       loginForm: {
-        username: "admin",
+        username: "god-user",
         password: "123456",
         captcha: "",
         captchaId: "",

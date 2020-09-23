@@ -40,7 +40,7 @@ service.interceptors.request.use(
             'x-user-id': user.ID
         }
         if (config.url === '/watchdog/downloadConfig') {
-          
+
         }
         return config;
     },
@@ -64,7 +64,7 @@ service.interceptors.response.use(
         if (response.headers["new-token"]) {
             store.commit('user/setToken', response.headers["new-token"])
         }
-        debugger
+        
         // 判断是否为下载文件地址s 
         if (response.config.url.indexOf ("watchdog/downloadConfig") < 0) {
           

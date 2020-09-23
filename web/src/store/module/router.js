@@ -37,6 +37,7 @@ export const router = {
                 path: '/layout',
                 name: 'layout',
                 component: "view/layout/index.vue",
+                // component: "view/systemTools/exception/index.vue",
                 meta: {
                     title: "底层layout"
                 },
