@@ -2,7 +2,7 @@
 BINARY=gva-server
 all: clean npmBuild gotool  build
 npmBuild:
-	cd ../web && npm run build && cp -r ./dist/* ../server/fe
+	cd ../web && npm run build && rm -rf ../server/fe/** && cp -r ./dist/* ../server/fe
 build:
 	# 将静态文件打包到二进制文件中
 	go generate -tags=packfile ./packfile/usePackFile.go

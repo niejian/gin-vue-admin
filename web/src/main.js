@@ -65,3 +65,7 @@ new Vue({
 //引入echarts
 import echarts from 'echarts'
 Vue.prototype.$echarts = echarts;
+// 引入highlight.js代码高亮指令
+import Highlight from './utils/highlight';
+Vue.use(Highlight);
+

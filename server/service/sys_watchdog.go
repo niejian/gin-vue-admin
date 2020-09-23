@@ -83,6 +83,7 @@ func CopyConfig(requestData request.ConfigWatchDogEnvStruct, filename string) er
 
 	// 本地运行scp命令
 	command := exec.Command("/bin/bash", "-c", shellCmd)
+	global.GVA_LOG.Info("复制配置命令：", zap.Any("cmd", shellCmd))
 	rep, err := command.CombinedOutput()
 
 	if nil != err {

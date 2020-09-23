@@ -30,7 +30,6 @@ const closeLoading = () => {
     //http request 拦截器
 service.interceptors.request.use(
     config => {
-      
         showLoading()
         const token = store.getters['user/token']
         const user = store.getters['user/userInfo']
@@ -39,6 +38,9 @@ service.interceptors.request.use(
             'Content-Type': 'application/json',
             'x-token': token,
             'x-user-id': user.ID
+        }
+        if (config.url === '/watchdog/downloadConfig') {
+          
         }
         return config;
     },
@@ -62,6 +64,7 @@ service.interceptors.response.use(
         if (response.headers["new-token"]) {
             store.commit('user/setToken', response.headers["new-token"])
         }
+        debugger
         // 判断是否为下载文件地址s 
         if (response.config.url.indexOf ("watchdog/downloadConfig") < 0) {
           

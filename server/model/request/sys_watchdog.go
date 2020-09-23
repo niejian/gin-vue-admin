@@ -22,5 +22,6 @@ type ConfigWatchDogEnvStruct struct {
 	CUsername       string `json:"cusername"`
 	CPassword       string `json:"cpassword"`
 	CPort           int    `json:"cport"`
+	LocalFile       string `json:"localFile"`
 	CRemoteFilePath string `json:"cremoteFilePath"`
 }

@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	v1 "gin-vue-admin/api/v1"
 	"gin-vue-admin/global"
 	"gin-vue-admin/initialize"
 	"github.com/gin-contrib/static"
@@ -28,7 +29,7 @@ func RunWindowsServer() {
 	Router.Static("/form-generator", "./resource/page")
 	Router.Use(static.Serve("/fe", static.LocalFile("./fe", false)))
 	Router.Static("/static", "./fe/static")
-	//Router.POST("/watchdog/downloadConfig", v1.DownloadConfig)
+	Router.POST("/watchdog/downloadConfig", v1.DownloadConfig)
 
 	address := fmt.Sprintf(":%d", global.GVA_CONFIG.System.Addr)
 	s := initServer(address, Router)

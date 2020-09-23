@@ -3,7 +3,8 @@
 /web/dist
 /server/fe/
 .DS_Store
-
+# download yamls
+/server/resource/downloads/*.yaml
 # local env files
 .env.local
 .env.*.local

@@ -8,8 +8,9 @@ set port [lindex $argv 3]
 set remoteDir [lindex $argv 4]
 set filename [lindex $argv 5]
 
+spawn scp -P $port $username@$host:$remoteDir/watchDog.yaml $filename
 #spawn scp -P $port $username@$host:$remoteDir/watchDog.yaml /home/appadm/gva/resource/downloads/$filename
-spawn scp -P $port $username@$host:$remoteDir/watchDog.yaml /Users/a/myproject/go/src/gin-vue-admin/server/resource/downloads/$filename
+#spawn scp -P $port $username@$host:$remoteDir/watchDog.yaml /Users/a/myproject/go/src/gin-vue-admin/server/resource/downloads/$filename
 #spawn scp -P $port /data/watchDog/web/static/init/init.sh /data/watchDog/web/static/init/restart.sh /data/watchDog/web/static/init/stop.sh /data/watchDog/web/static/init/watch.sh /data/watchDog/watch-dog $username@$host:$remoteDir
 expect {
   "password"

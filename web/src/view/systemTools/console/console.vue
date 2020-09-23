@@ -5,7 +5,7 @@
 <script>
 import Terminal from '@/view/systemTools/console/Xterm'
 export default {
-  name: 'console',
+  name: 'Console',
   props: {
     terminal: {
       type: Object,
@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     termOnData(data){
-      debugger
+      //debugger
       // console.log("socket send:", msg.data)
       this.terminalSocket.send(data)
     },
@@ -31,7 +31,7 @@ export default {
       // this.term.write(msg.data)
     },
     runRealTerminal (data) {
-      debugger
+      //debugger
       this.terminalSocket.send(data)
       console.log('webSocket is finished')
     },

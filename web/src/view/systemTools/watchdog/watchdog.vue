@@ -24,9 +24,13 @@
         </el-form-item>
       </el-form>
     </el-tab-pane>
-      <el-dialog :title="title" :visible.sync="showTerminal" width="80%" @close="close" @open="open">
-        <my-terminal :terminal="terminal" :url="url" ref="console"></my-terminal>
-      </el-dialog>
+    <el-dialog :title="title" :visible.sync="showTerminal" width="80%" @close="close" @open="open">
+      <my-terminal :terminal="terminal" :url="url" ref="console"></my-terminal>
+    </el-dialog>
+
+    <el-dialog title="watchDog.yaml" :visible.sync="showdemo" width="80%" >
+      <config-demo></config-demo>
+    </el-dialog>
       
       
     <el-tab-pane label="配置传输" name="scpConfig">
@@ -52,21 +56,25 @@
             style="width: 350px;float:left"
             class="upload-demo"
             ref="upload"
-            list-type="text"
+            action=""
+            :http-request="httpRequest"
+            :list-type="listType"
             :before-upload="beforeUpload"
-            limit="1"
-            :auto-upload="false">
+            :limit="limit"
+            :auto-upload="autoUpload">
             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-            <!-- <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button> -->
+            <el-button style="margin-left: 10px;" size="small" type="info" @click="configDemo">配置示例</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="danger" @click="download">模板下载</el-button>
+            <!-- <el-link type="primary" @click="download" download="">配置模板下载</el-link> -->
             <div slot="tip" class="el-upload__tip" style="width:250px">请上传名为watchDog.yaml的配置文件</div>
           </el-upload>
-          <el-link type="primary" @click="download" download="">配置模板下载</el-link>
 
         </el-form-item>
+        <!-- <el-link type="primary" @click="download" download="">配置模板下载</el-link> -->
       
         <el-form-item>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <el-button type="primary" round @click="submitForm('configRuleForm')" icon="el-icon-edit">配置上传</el-button>
+          <el-button type="success" round @click="submitUpload" icon="el-icon-upload">配置上传</el-button>
          
         </el-form-item>
 
@@ -81,14 +89,21 @@
     try2Connect,
     downloadConfig
   } from '@/api/watchdog'
-  import console from '@/view/systemTools/console/console'
+  import Console from '@/view/systemTools/console/console'
+  import ConfigDemo from './configDemo.vue'
+  import { store } from '@/store/index'
+  import axios from 'axios'; 
   export default {
     data() {
       
       return {
+        limit: 1,
+        autoUpload: false,
+        listType: 'text',
         title: '',
         url: "",
         showTerminal: false,
+        showdemo: false,
         terminal: {
           pid: 1,
           name: 'terminal',
@@ -158,7 +173,8 @@
       };
     },
     components: {
-      "my-terminal" : console
+      "my-terminal": Console,
+      "config-demo": ConfigDemo
     },
     methods: {
       // 表达提交
@@ -172,29 +188,67 @@
               this.doInitEnv()
             }else if (formName == 'configRuleForm') {
               this.configRuleForm.cport = this.numberValidateForm.port
-              console.log(this.configRuleForm)
-            }
-              
-            
-            } else {
+            }     
+          } else {
               console.log('error submit!!');
               return false;
             }
         });
       },
-      beforeUpload(file) {
-        debugger
+      // param是自带参数。 this.$refs.upload.submit() 会自动调用 httpRequest方法.在里面取得file
+      httpRequest(param){
+        // console.log(param)
+        // debugger
+        let fileObj = param.file // 相当于input里取得的files
+        let fd = new FormData()// FormData 对象
+        fd.append('file', fileObj)// 文件对象
+
+        fd.append('username', this.configRuleForm.cusername)
+        fd.append('password', this.configRuleForm.cpassword)
+        fd.append('ip', this.configRuleForm.cip)
+        fd.append('port', this.configRuleForm.cport)
+        const token = store.getters['user/token']
+        const user = store.getters['user/userInfo']
+        
+        // 文件上传
+        let config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'x-token': token,
+            'x-user-id': user.ID
+          }
+        }
+
+        // 请求地址
+        let url = process.env.VUE_APP_BASE_API + '/watchdog/upload'
+
+        axios.post(url, fd, config).then(res => {
+          if(res.data.code === 0){
+            // 提交成功
+            this.$message({
+              message: '操作成功',
+              type: 'success'
+            });
+            // 清空列表
+            this.$refs.upload.clearFiles()
+          }else {
+            // 提交失败
+            this.$message({
+              message: res.data.msg,
+              type: 'error'
+            });
+          }
+        })
+      },
+      beforeUpload(file) {     
         console.log(file)
       },
       submitUpload() {
-        debugger
-        console.log(this.$refs)
+        // console.log(this.$refs)  
         this.$refs.upload.submit();
       },
       download() {
-        // downloadConfig(this.configRuleForm).then(resp => {
-        //   // console.log(resp)
-        // })
+        debugger
         downloadConfig(this.configRuleForm).then(res => {
           // 判断是否连接成功
           if (res.data.code == 7){
@@ -204,7 +258,7 @@
             });
             return
           }
-          
+          // 从response中获取到文件信息并下载下来
           let blob = new Blob([res.data], { type: 'application/octet-stream' })
           let href = window.URL.createObjectURL(blob)
 
@@ -217,6 +271,11 @@
           document.body.removeChild(link)
           window.URL.revokeObjectURL(link)
         })
+      },
+      // 配置示例
+      configDemo(){
+        this.showdemo = true
+
       },
       handleClick(tab, event) {
         let tableName = tab.name
@@ -249,7 +308,16 @@
             if ('initRuleForm' == formName) {
               this.initRuleForm.port = this.numberValidateForm.port
               this.showTerminal = true
-              this.url = "ws://localhost:8888/ws/1?cols=188&rows=50&username="+this.initRuleForm.username+"&host="+this.initRuleForm.ip + "&password="+escape(this.initRuleForm.password)  + "&port=22"
+              // 获取当前访问地址
+              let addr = window.location.href
+              // console.log(addr)
+              if (addr) {
+                let ns = addr.split(":")[1] // ==> //localhost
+                this.url = "ws:"+ns+":8888/ws/1?cols=188&rows=50&username="+this.initRuleForm.username+"&host="+this.initRuleForm.ip + "&password="+escape(this.initRuleForm.password)  + "&port=22"
+
+              }
+
+              
             }            
           }
           
