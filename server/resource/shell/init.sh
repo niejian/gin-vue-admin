@@ -15,6 +15,7 @@ echo "开始停止"
 #wget --no-check-certificate https://h5oss.bluemoon.com.cn/monitor/watch-dog
 #wget --no-check-certificate https://h5oss.bluemoon.com.cn/monitor/restart.sh
 #wget --no-check-certificate https://h5oss.bluemoon.com.cn/monitor/stop.sh
+mv watch-dog.tmp watch-dog
 chmod a+x watch-dog
 chmod a+x init.sh
 chmod a+x stop.sh

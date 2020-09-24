@@ -159,9 +159,13 @@ func DoFileScp(username, password, host, remoteDir, fileName string,
 			//output, err := session.CombinedOutput("cd " + remoteDir + " && ./restart.sh watch-dog " + " && cd " + remoteDir + " && " + startCMD)
 			//output, err := session.Output("cd " + remoteDir + " && ./restart.sh watch-dog " + " && cd " + remoteDir + " && " + startCMD)
 			//output, err := session.Output("cd " + remoteDir + " && ./restart.sh watch-dog > /dev/null 2>&1 &")
-			output, err := session.Output("cd " + remoteDir + " && ./stop.sh watch-dog > /dev/null 2>&1 &")
+			//stopCmd := fmt.Sprintf("%s%s%s", "/bin/bash ", remoteDir, "/stop.sh watch-dog > /dev/null 2>&1 \n")
+			stopCmd := fmt.Sprintf("%s%s", remoteDir, "/stop.sh watch-dog ")
+			//output, err := session.Output("cd " + remoteDir + " && ./stop.sh watch-dog > /dev/null 2>&1 &")
+			output, err := session.Output(stopCmd)
+			fmt.Printf("stop 命令 %v \n", stopCmd)
 
-			log.Println("启动命令返回结果：", string(output))
+			global.GVA_LOG.Info("重启命令返回结果：", zap.Any("重启命令返回结果", string(output)))
 			defer session.Close()
 			return nil
 		}()
