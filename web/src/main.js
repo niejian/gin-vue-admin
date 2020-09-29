@@ -68,4 +68,6 @@ Vue.prototype.$echarts = echarts;
 // 引入highlight.js代码高亮指令
 import Highlight from './utils/highlight';
 Vue.use(Highlight);
+import axios from 'axios'; // 引入axios
+axios.defaults.timeout = 99999;
 
