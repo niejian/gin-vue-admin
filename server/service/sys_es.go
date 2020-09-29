@@ -118,22 +118,103 @@ func IndexOverview(indexName, createDate string) []es.AggIndex {
 func FindFDatasByIndiceName(queryExceptionRequest *request.GetExceptionDetailStruct) ([]es.Exception, error) {
 	var exs []es.Exception
 	ctx := context.Background()
+
 	queryExceptionTag := elastic.NewTermQuery(EXCEPTION_TAG, queryExceptionRequest.ExceptionTag)
 
 	queryCreateDate := elastic.NewTermQuery(CREATEDATE, queryExceptionRequest.CreateDate)
 	// 组合条件查询
 	query := elastic.NewBoolQuery().Must(queryExceptionTag, queryCreateDate)
+	// 数据总数
+	count, err := global.GVA_ES.Count(queryExceptionRequest.IndexName).
+		Query(query).Do(ctx)
+
+	if nil != err {
+		count = 0
+	}
+	global.GVA_LOG.Info("数据总量：", zap.Any("total", count))
+	// 翻页获取数据信息
+	pageNum := 0
+	pageSize := 100
+	index := 0
+
+	/*
+		searchResult, err := global.
+			GVA_ES.Search(queryExceptionRequest.IndexName).
+			Query(query).
+			Sort("id", false).
+			From(0).
+			Size(10000).
+			Do(ctx)
+		if nil != err {
+			global.GVA_LOG.Info("查询失败：", zap.Any("err", err))
+			return nil, err
+		}
+
+		var ex es.Exception
+		for _, item := range searchResult.Each(reflect.TypeOf(ex)) {
+			i := item.(es.Exception)
+			msg := "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"
+			i.Msg = msg
+			exs = append(exs, i)
+		}
+
+		global.GVA_LOG.Info("查询某天详细信息：", zap.Any("result", exs))
+
+	*/
+
+	for {
+		datas, err := getExceptionDetailDataByPage(queryExceptionRequest.IndexName,
+			query, pageNum, pageSize)
+		if err != nil {
+			global.GVA_LOG.Error("查询失败，", zap.Any("err", err))
+		} else {
+
+			// 先追加数据
+			for _, data := range datas {
+				exs = append(exs, data)
+			}
+
+			// 再判断是否退出循环
+			if len(datas) < pageSize {
+				break
+			}
+
+			if pageNum > int(count) {
+				break
+			}
+			index = index + 1
+			pageNum = index * pageSize
+
+		}
+	}
+
+	fmt.Printf("======》总数：%v\n", len(exs))
+
+	return exs, nil
+}
+
+// 分页获取错误信息
+func getExceptionDetailDataByPage(indexName string, query elastic.Query,
+	pageNum, pageSize int) ([]es.Exception, error) {
+	var exs []es.Exception
+	ctx := context.Background()
+
+	global.GVA_LOG.Info("开始分页获取异常详情",
+		zap.Int("from", pageNum),
+		zap.Int("size", pageSize))
 
 	searchResult, err := global.
-		GVA_ES.Search(queryExceptionRequest.IndexName).
+		GVA_ES.Search(indexName).
 		Query(query).
-		Sort("id", true).
-		From(0).
-		Size(10000).
+		Sort("id", false).
+		From(pageNum).
+		Size(pageSize).
 		Do(ctx)
 	if nil != err {
-		global.GVA_LOG.Info("查询失败：", zap.Any("err", err))
-		return nil, err
+		global.GVA_LOG.Info("分页查询失败：",
+			zap.Any("err", err),
+			zap.Any("pageNum", pageNum))
+		return exs, err
 	}
 
 	var ex es.Exception

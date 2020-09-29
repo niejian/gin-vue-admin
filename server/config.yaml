@@ -10,9 +10,9 @@ jwt:
 
 # mysql connect configuration
 mysql:
-  username: root
-  password: 'code4fun1234'
-  path: '192.168.242.151:3306'
+  username: apollo
+  password: 'qq123123'
+  path: '192.168.242.105:3306'
   db-name: 'ginVueAdmin'
   config: 'charset=utf8mb4&parseTime=True&loc=Local'
   max-idle-conns: 10

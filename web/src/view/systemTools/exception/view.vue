@@ -36,12 +36,11 @@
     <div :class="className" :id="className" :style="{height:height,width:width}"></div>
 
     <!-- 异常显示(折叠面板) -->
-    <!-- 新增角色弹窗 -->
     <el-dialog :title="dialogTitle" :visible.sync="show" width="80%" @close="closeDetail">
       <div style="width:100%;height:100%">
         
-        <el-collapse v-for="item in items" :key="item.id">
-          <el-collapse-item >
+        <el-collapse v-for="item in items" :key="item.id" >
+          <el-collapse-item @click="collapseClick">
             <template slot="title">
               <span style="color:gray;font-size:20px">{{item.createDate}}</span>-
               <span style="color:green;font-size:20px">{{item.ip}}</span>-
@@ -149,6 +148,11 @@ export default {
     } 
   },
   methods: {
+    // 点击折叠面板
+    collapseClick(e) {
+      debugger
+      console.log(e)
+    },
     daysChange(e){
       this.showExceptionOverview(this.selectedIndexName, e) 
     },
