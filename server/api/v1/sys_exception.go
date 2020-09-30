@@ -149,3 +149,31 @@ func GetExceptionDetails(c *gin.Context) {
 	}
 
 }
+
+// @Tags GetExceptionDetails
+// @Summary restful 通过Id获取异常详细信息
+// @Security ApiKeyAuth
+// @Produce  application/json
+// @Param data body request.RegisterAndLoginStruct true "可以什么都不填"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"返回成功"}"
+// @Router /exception/view [post]
+func GetExceptionById(c *gin.Context) {
+	id := c.Param("id")
+	indexName := c.Param("indexName")
+	if "" == id || "" == indexName {
+		response.FailWithMessage("请选择一条数据查看", c)
+		return
+	}
+
+	data, err := service.GetExceptionDetailById(indexName, id)
+	if nil != err {
+		global.GVA_LOG.Info("根据Id查询异常信息失败：",
+			zap.Any("index", indexName),
+			zap.Any("id", id))
+		response.FailWithMessage(fmt.Sprintf("根据Id查询异常信息失败，%v", err), c)
+
+	} else {
+
+		response.OkWithData(data, c)
+	}
+}

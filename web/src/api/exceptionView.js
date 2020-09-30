@@ -50,3 +50,16 @@ export const indexException = (data) => {
     data
   })
 }
+
+// @Summary 根据索引名称和Id详细信息
+// @Produce  application/json
+// @Param {
+//  indexName     string
+// }
+// @Router /exception/indexException [post]
+export const getExceptionById = (indexName, id) => {
+  return service({
+    url: "/exception/getExceptionById/"+ indexName + "/" + id,
+    method: 'get'
+  })
+}

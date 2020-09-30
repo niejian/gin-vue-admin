@@ -22,6 +22,7 @@ func InitExceptionViewRouter(Router *gin.RouterGroup) (R gin.IRoutes) {
 		ExceptionViewRouter.POST("exceptionDetails", v1.GetExceptionDetails)
 		// 3. 通过索引名获取信息
 		ExceptionViewRouter.POST("indexException", v1.GetExceptionDailyViewByIndexName)
+		ExceptionViewRouter.GET("getExceptionById/:indexName/:id", v1.GetExceptionById)
 	}
 
 	return ExceptionViewRouter

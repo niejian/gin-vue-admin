@@ -6,6 +6,7 @@ import (
 	"gin-vue-admin/global"
 	"gin-vue-admin/model/es"
 	"gin-vue-admin/model/request"
+	"gin-vue-admin/utils"
 	"github.com/olivere/elastic/v7"
 	"go.uber.org/zap"
 	"reflect"
@@ -137,31 +138,6 @@ func FindFDatasByIndiceName(queryExceptionRequest *request.GetExceptionDetailStr
 	pageSize := 100
 	index := 0
 
-	/*
-		searchResult, err := global.
-			GVA_ES.Search(queryExceptionRequest.IndexName).
-			Query(query).
-			Sort("id", false).
-			From(0).
-			Size(10000).
-			Do(ctx)
-		if nil != err {
-			global.GVA_LOG.Info("查询失败：", zap.Any("err", err))
-			return nil, err
-		}
-
-		var ex es.Exception
-		for _, item := range searchResult.Each(reflect.TypeOf(ex)) {
-			i := item.(es.Exception)
-			msg := "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"
-			i.Msg = msg
-			exs = append(exs, i)
-		}
-
-		global.GVA_LOG.Info("查询某天详细信息：", zap.Any("result", exs))
-
-	*/
-
 	for {
 		datas, err := getExceptionDetailDataByPage(queryExceptionRequest.IndexName,
 			query, pageNum, pageSize)
@@ -209,6 +185,7 @@ func getExceptionDetailDataByPage(indexName string, query elastic.Query,
 		Sort("id", false).
 		From(pageNum).
 		Size(pageSize).
+		FilterPath("hits.total", "hits.hits", "hits.hits._source&_source=id,ip,createDate,appName,exceptionTag,createTime"). // 排除详情字段，懒加载
 		Do(ctx)
 	if nil != err {
 		global.GVA_LOG.Info("分页查询失败：",
@@ -220,10 +197,41 @@ func getExceptionDetailDataByPage(indexName string, query elastic.Query,
 	var ex es.Exception
 	for _, item := range searchResult.Each(reflect.TypeOf(ex)) {
 		i := item.(es.Exception)
-		msg := "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"
-		i.Msg = msg
+		//msg := "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"
+		i.Msg = ""
+		// 时间格式化
+		createTime := i.CreateTime
+		i.CreateDate = utils.FormatTimeByTimestamp(createTime)
 		exs = append(exs, i)
 	}
 
 	return exs, nil
+}
+
+// 根据Id获取某条索引下面的具体数据信息
+func GetExceptionDetailById(indexName, id string) (es.Exception, error) {
+	var ex es.Exception
+	ctx := context.Background()
+	query := elastic.NewTermQuery("id", id)
+	searchResult, err := global.GVA_ES.Search(indexName).
+		Query(query).
+		Do(ctx)
+
+	if nil != err {
+		global.GVA_LOG.Info("根据Id查询异常信息失败：",
+			zap.Any("index", indexName),
+			zap.Any("id", id))
+		return ex, err
+	}
+
+	for _, item := range searchResult.Each(reflect.TypeOf(ex)) {
+		i := item.(es.Exception)
+		//msg := i.Id + "<br/>" + "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"sc
+		msg := "<div>" + strings.ReplaceAll(i.Msg, "\n", "</div><div>") + "</div>"
+		i.Msg = msg
+		ex = i
+		break
+	}
+
+	return ex, nil
 }

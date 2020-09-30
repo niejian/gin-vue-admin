@@ -39,8 +39,8 @@
     <el-dialog :title="dialogTitle" :visible.sync="show" width="80%" @close="closeDetail">
       <div style="width:100%;height:100%">
         
-        <el-collapse v-for="item in items" :key="item.id" >
-          <el-collapse-item @click="collapseClick">
+        <el-collapse v-for="item in items" :key="item.id" @click.native="clickItem(item)">
+          <el-collapse-item >
             <template slot="title">
               <span style="color:gray;font-size:20px">{{item.createDate}}</span>-
               <span style="color:green;font-size:20px">{{item.ip}}</span>-
@@ -65,7 +65,8 @@ import {
   getExceptionOverview,
   getExceptionView,
   exceptionDetails,
-  indexException
+  indexException,
+  getExceptionById
 } from '@/api/exceptionView'
 
 import echarts from 'echarts'
@@ -148,10 +149,17 @@ export default {
     } 
   },
   methods: {
-    // 点击折叠面板
-    collapseClick(e) {
-      debugger
-      console.log(e)
+    // 点击折叠面板, 获取错误详情
+    clickItem( val) {
+      if ("" == val.msg) {
+        let id = val.id
+        // 点击查看详情
+        getExceptionById(this.selectedIndexName, id).then(resp => {
+          if(resp.code === 0) {
+            val.msg = resp.data.msg
+          }
+        })
+      } 
     },
     daysChange(e){
       this.showExceptionOverview(this.selectedIndexName, e) 
