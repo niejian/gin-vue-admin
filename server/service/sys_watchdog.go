@@ -29,20 +29,39 @@ func InitWatchdogEnv(envStruct *request.InitWatchDogEnvStruct) (string, error) {
 
 	defer session.Close()
 	pwd, _ := os.Getwd()
+	// pwd = /home/appadm
+	shellPath := pwd + "/resource/shell"
+
+	global.GVA_LOG.Info("shellPath 当前路径：", zap.String("shell-path", shellPath))
 
 	shellCmd := fmt.Sprintf("%s%s%s%s%s%s%s%s%d%s%s", pwd, "/resource/shell/scp.sh ", username,
-		" ", ip, " ", password, " ", port, " ", remoteFilePath)
+		" ", ip, " ", password, " ", port, " ", shellPath)
 	// 本地运行scp命令
 	command := exec.Command("/bin/bash", "-c", shellCmd)
 	rep, err := command.CombinedOutput()
 
 	if nil != err {
 		resMsg = err.Error()
-		global.GVA_LOG.Error("运行scp:" + shellCmd + ", 返回 " + string(rep))
+		global.GVA_LOG.Error("运行scp shell:" + shellCmd + ", 返回 " + string(rep))
 		return err.Error(), err
 	}
 
-	global.GVA_LOG.Info("scp 结果：", zap.Any("scp", string(rep)))
+	global.GVA_LOG.Info("scp shell 结果：", zap.Any("scp", string(rep)))
+
+	// scp bin
+	shellCmd = fmt.Sprintf("%s%s%s%s%s%s%s%s%d%s%s", pwd, "/resource/shell/scp-bin.sh ", username,
+		" ", ip, " ", password, " ", port, " ", remoteFilePath)
+	// 本地运行scp命令
+	command = exec.Command("/bin/bash", "-c", shellCmd)
+	rep, err = command.CombinedOutput()
+
+	if nil != err {
+		resMsg = err.Error()
+		global.GVA_LOG.Error("运行scp bin:" + shellCmd + ", 返回 " + string(rep))
+		return err.Error(), err
+	}
+
+	global.GVA_LOG.Info("scp bin 结果：", zap.Any("scp", string(rep)))
 
 	global.GVA_LOG.Info("init 当前路径：", zap.String("init-path", pwd))
 	err = utils.DoPathscp(username, password, ip, pwd+"/resource/shell/init.sh", remoteFilePath, port)

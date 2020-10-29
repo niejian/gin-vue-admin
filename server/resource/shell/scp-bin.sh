@@ -5,13 +5,10 @@ set username [lindex $argv 0]
 set host [lindex $argv 1]
 set passwd [lindex $argv 2]
 set port [lindex $argv 3]
-#set remoteDir [lindex $argv 4]
-set shellDir [lindex $argv 4]
+set remoteDir [lindex $argv 4]
 
 #spawn scp /data/watchDog/watch-dog appadm@192.168.240.53:/home/appadm
-spawn scp -P $port $shellDir/init.sh $shellDir/start.sh $shellDir/restart.sh $shellDir/stop.sh $shellDir/watch.sh $username@$host:/data/watchDog/
-
-#spawn scp -P $port /data/watchDog/watch-dog $username@$host:$remoteDir/watch-dog.tmp
+spawn scp -P $port /data/watchDog/watch-dog $username@$host:/data/watchDog/watch-dog.tmp
 
 expect {
   "password"
