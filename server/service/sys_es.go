@@ -61,7 +61,8 @@ func GetExceptionOverview(indexName string, days int) []es.AggIndex {
 	query := elastic.NewRangeQuery(CREATEDATE).Gte(from).Lte(now)
 
 	// 根据结果key（插入日期：20200916）升序排序
-	agg := elastic.NewTermsAggregation().Field(CREATEDATE).Order("_key", true)
+	// 聚合查询需要加入 size，不然默认返回10条
+	agg := elastic.NewTermsAggregation().Field(CREATEDATE).Order("_key", true).Size(1000)
 	searchResult, err := global.GVA_ES.
 		Search(indexName).
 		Query(query).
