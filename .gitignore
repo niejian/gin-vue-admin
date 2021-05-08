@@ -8,7 +8,7 @@
 # local env files
 .env.local
 .env.*.local
-
+server/vendor/
 # Log files
 npm-debug.log*
 yarn-debug.log*
