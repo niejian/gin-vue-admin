@@ -11,9 +11,14 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	vCore "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
-var clientSet = k8sapi.InitK8s()
+var (
+	clientSet  = k8sapi.InitK8s()
+	anno       = "kubesphere.io/creator"
+	kubesphere = "kubesphere"
+)
 
 //var db = global.GVA_DB.Table("log_alter_conf")
 
@@ -34,7 +39,23 @@ func ListNs() (*[]string, error) {
 
 	items := namespaces.Items
 	for _, ns := range items {
-		nsList = append(nsList, ns.Name)
+		namespace := ns.Name
+		// kubesphere开头，过滤
+		if strings.HasPrefix(namespace, kubesphere) {
+			continue
+		}
+		// 获取普通用户创建的命名空间(剔除admin创建的namespace)
+		annotations := ns.Annotations
+		if creator, ok := annotations[anno]; ok && creator == "admin" {
+			continue
+		}
+
+		// 这个ns没有deploy也过滤掉
+		//deploys, _ := ListDeploy(namespace)
+		//if nil == deploys {
+		//	continue
+		//}
+		nsList = append(nsList, namespace)
 	}
 	return &nsList, nil
 }

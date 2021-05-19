@@ -17,7 +17,7 @@ import (
 //@return []string
 //@return error
 func ListNs(clientSet *kubernetes.Clientset) ([]string, error) {
-	nsList := make([]string, 10)
+	var nsList []string
 	namespaces, err := clientSet.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		global.GVA_LOG.Error("获取命名空间失败")
