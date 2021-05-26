@@ -16,9 +16,11 @@ type ErrorLogAlterConfig struct {
 	AppName string `json:"appName" gorm:"comment: 应用名称"`
 	// 命名空间
 	Namespace string `json:"namespace" gorm:"comment: 命名空间"`
+	// 是否开启错误存储（0,1）,默认0
+	EnableStore int `json:"enableStore" gorm:"comment: 是否开启错误存储（0,1）,默认0"`
 }
 
 // 将 User 的表名设置为 `profiles`
 func (ErrorLogAlterConfig) TableName() string {
-	return "profiles"
+	return "log_alter_conf"
 }

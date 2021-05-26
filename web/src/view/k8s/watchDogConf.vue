@@ -41,6 +41,15 @@
         <el-form-item label="通知人编号" prop="toUserIds">
           <common-tag :dynamicTags="form.toUserIds" :moduleName="toUserIdsModuleName" ref="toUserIdTag"></common-tag>
         </el-form-item>
+        <el-form-item label="是否存储" icon="el-icon-question">
+          <el-tooltip class="item" effect="dark" content="是否开启错误信息持久化" placement="top-start">
+            <i class="el-icon-question"></i>
+          </el-tooltip>
+
+          <!-- <i class="el-icon-question"></i> -->
+          &nbsp;&nbsp;&nbsp;&nbsp;<el-switch v-model="form.enableStore"></el-switch>
+        </el-form-item>
+
 
         <el-form-item>
           <el-button type="primary" @click="onSubmit('form')">立即更新</el-button>
@@ -100,6 +109,7 @@ export default {
         errs: [],
         ignores: [],
         toUserIds: [],
+        enableStore: false,
       },
       rules: {
         ns: [
@@ -147,6 +157,7 @@ export default {
         this.form.errs = []
         this.form.ignores = []
         this.form.toUserIds = []
+        this.form.enableStore = 0
 
         deploys(item).then((resp) => {
           if (resp.code == 0 && resp.data.items) {
@@ -170,13 +181,13 @@ export default {
       this.form.ignores = []
       this.form.toUserIds = []
       this.configId = ""
+      this.form.enableStore=false
       this.form.appName = item
 
       let ns = this.form.ns
       if (ns && item) {
         getConfByNsAndAppName(ns, item).then(resp => {
           if (resp.code == 0) {
-            
             let data = resp.data[0]
             if (data) {
               this.form.id = data.ID
@@ -193,6 +204,7 @@ export default {
               if (toUserIds && "" != toUserIds) {
                 this.form.toUserIds = toUserIds.split("|")
               }
+              this.form.enableStore = data.enableStore==1 ? true:false
             }
           }
         })
@@ -217,6 +229,9 @@ export default {
           }
           data.ns = this.form.ns
           data.appName = this.form.appName
+          let enableStore = this.form.enableStore
+
+          data.enableStore = enableStore ? 1 : 0
           
           if (this.form.id && this.form.id > 0) {
             data.id = this.form.id
@@ -231,8 +246,15 @@ export default {
                 type: 'success'
               });
               this.$refs['form'].resetFields();
-              this.form = {}
-
+              this.form = {
+                id: -1,
+                ns: '',
+                appName: '',
+                errs: [],
+                ignores: [],
+                toUserIds: [],
+                enableStore: false
+              }
             }
           })
           

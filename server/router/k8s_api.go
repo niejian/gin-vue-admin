@@ -24,5 +24,7 @@ func InitK8sApi(Router *gin.RouterGroup) {
 		// 添加配置信息
 		ApiRouter.POST("watchConf/addOrUpdate", v1.AddWatchdogConf)
 		ApiRouter.GET("getConfByNsAndAppName/:ns/:appName", v1.GetConfByNsAndAppName)
+		// 分页获取配置列表信息
+		ApiRouter.POST("getConfList", v1.GetConfigList)
 	}
 }

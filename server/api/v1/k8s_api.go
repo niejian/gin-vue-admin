@@ -7,6 +7,7 @@ import (
 	"gin-vue-admin/global/response"
 	"gin-vue-admin/model/k8s"
 	"gin-vue-admin/model/request"
+	resp "gin-vue-admin/model/response"
 	"gin-vue-admin/service"
 	"gin-vue-admin/utils"
 	"github.com/gin-gonic/gin"
@@ -98,11 +99,12 @@ func AddWatchdogConf(c *gin.Context) {
 	}
 	// 组装成结构体
 	logAlter := &k8s.ErrorLogAlterConfig{
-		Errs:      requestData.Errs,
-		AppName:   requestData.AppName,
-		Namespace: requestData.Namespace,
-		Ignores:   requestData.Ignores,
-		ToUserIds: requestData.ToUserIds,
+		Errs:        requestData.Errs,
+		AppName:     requestData.AppName,
+		Namespace:   requestData.Namespace,
+		Ignores:     requestData.Ignores,
+		ToUserIds:   requestData.ToUserIds,
+		EnableStore: requestData.EnableStore,
 	}
 
 	// 判断新增还是更新
@@ -143,4 +145,34 @@ func GetConfByNsAndAppName(c *gin.Context) {
 	}
 	configs := service.GetLogAlterConfByNsAndAppName(ns, appName)
 	response.OkDetailed(&configs, "请求成功", c)
+}
+
+//GetConfigList doc
+//@Description: 分页获取配置列表
+//@Author niejian
+//@Date 2021-05-26 11:16:02
+//@param c
+func GetConfigList(c *gin.Context) {
+
+	// 此结构体仅本方法使用
+	var sp request.SearchWatchdogConfParam
+	_ = c.ShouldBindJSON(&sp)
+	PageVerifyErr := utils.Verify(sp.PageInfo, utils.CustomizeMap["PageVerify"])
+	if PageVerifyErr != nil {
+		response.FailWithMessage(PageVerifyErr.Error(), c)
+		return
+	}
+
+	list, total, err := service.GetWatchDogConfList(sp.ErrorLogAlterConfig, sp.PageInfo)
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("获取数据失败，%v", err), c)
+	} else {
+		response.OkWithData(resp.PageResult{
+			List:     &list,
+			Total:    total,
+			Page:     sp.PageInfo.Page,
+			PageSize: sp.PageInfo.PageSize,
+		}, c)
+	}
+
 }

@@ -2,6 +2,8 @@
 
 package request
 
+import "gin-vue-admin/model/k8s"
+
 type ErrorLogAlterConfig struct {
 	// 发送工号
 	ToUserIds string `json:"toUserIds"`
@@ -12,6 +14,12 @@ type ErrorLogAlterConfig struct {
 	// 应用名称
 	AppName string `json:"appName"`
 	// 命名空间
-	Namespace string `json:"ns"`
-	Id        int    `json:"ID"`
+	Namespace   string `json:"ns"`
+	Id          int    `json:"ID"`
+	EnableStore int    `json:"enableStore"`
+}
+
+type SearchWatchdogConfParam struct {
+	k8s.ErrorLogAlterConfig
+	PageInfo
 }

@@ -35,3 +35,12 @@ export const getConfByNsAndAppName = (ns, appName) => {
     method: "GET"
   })
 }
+
+// 获取配置列表信息
+export const getConfList = (data) => {
+  return service({
+    url: "/k8sapi/getConfList",
+    method: "POST",
+    data
+  })
+}

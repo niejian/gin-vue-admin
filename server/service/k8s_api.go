@@ -7,6 +7,7 @@ import (
 	"gin-vue-admin/global"
 	"gin-vue-admin/k8sapi"
 	"gin-vue-admin/model/k8s"
+	"gin-vue-admin/model/request"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/apps/v1"
 	vCore "k8s.io/api/core/v1"
@@ -18,6 +19,7 @@ var (
 	clientSet  = k8sapi.InitK8s()
 	anno       = "kubesphere.io/creator"
 	kubesphere = "kubesphere"
+	kubeSystem = "kube-system"
 )
 
 //var db = global.GVA_DB.Table("log_alter_conf")
@@ -42,6 +44,11 @@ func ListNs() (*[]string, error) {
 		namespace := ns.Name
 		// kubesphere开头，过滤
 		if strings.HasPrefix(namespace, kubesphere) {
+			continue
+		}
+
+		// kube-system过滤
+		if namespace == kubeSystem {
 			continue
 		}
 		// 获取普通用户创建的命名空间(剔除admin创建的namespace)
@@ -154,4 +161,37 @@ func UpdateAlterConfig(config *k8s.ErrorLogAlterConfig) {
 		config.DeletedAt = data.DeletedAt
 	}
 	global.GVA_DB.Table("log_alter_conf").Save(config)
+}
+
+//GetWatchDogConfList doc
+//@Description: 分页获取配置列表信息
+//@Author niejian
+//@Date 2021-05-26 11:20:33
+//@param api
+//@param info
+//@return list
+//@return total
+//@return err
+func GetWatchDogConfList(conf k8s.ErrorLogAlterConfig, info request.PageInfo) (list *[]k8s.ErrorLogAlterConfig, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+	db := global.GVA_DB.Model(&k8s.ErrorLogAlterConfig{})
+	var confList []k8s.ErrorLogAlterConfig
+
+	if conf.AppName != "" {
+		db = db.Debug().Where("app_name LIKE ?", "%"+conf.AppName+"%")
+	}
+
+	if conf.Namespace != "" {
+		db = db.Where("namespace LIKE ?", "%"+conf.Namespace+"%")
+	}
+
+	err = db.Count(&total).Error
+
+	if err == nil {
+		// 分页查询
+		err = db.Debug().Limit(limit).Offset(offset).Find(&confList).Error
+	}
+	return &confList, total, err
+
 }
