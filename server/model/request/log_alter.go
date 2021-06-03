@@ -17,6 +17,7 @@ type ErrorLogAlterConfig struct {
 	Namespace   string `json:"ns"`
 	Id          int    `json:"ID"`
 	EnableStore int    `json:"enableStore"`
+	IsEnable    int    `json:"IsEnable"`
 }
 
 type SearchWatchdogConfParam struct {

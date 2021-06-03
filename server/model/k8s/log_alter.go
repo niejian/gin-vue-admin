@@ -18,6 +18,7 @@ type ErrorLogAlterConfig struct {
 	Namespace string `json:"namespace" gorm:"comment: 命名空间"`
 	// 是否开启错误存储（0,1）,默认0
 	EnableStore int `json:"enableStore" gorm:"comment: 是否开启错误存储（0,1）,默认0"`
+	IsEnable    int `json:"isEnable" gorm:"comment: 是否开启异常告警（0,1）,默认1"`
 }
 
 // 将 User 的表名设置为 `profiles`

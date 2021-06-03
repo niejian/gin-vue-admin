@@ -50,6 +50,16 @@
           </div>
         </template>
       </el-table-column>
+      <el-table-column label="是否开启告警" >
+        <template slot-scope="scope">
+          <el-switch 
+            v-model="scope.row.isEnable"
+            :active-value="1"
+            :inactive-value="0"
+            :disabled="true"
+            ></el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="是否持久化错误" >
         <template slot-scope="scope">
           <el-switch 

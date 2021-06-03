@@ -105,6 +105,7 @@ func AddWatchdogConf(c *gin.Context) {
 		Ignores:     requestData.Ignores,
 		ToUserIds:   requestData.ToUserIds,
 		EnableStore: requestData.EnableStore,
+		IsEnable:    requestData.IsEnable,
 	}
 
 	// 判断新增还是更新
