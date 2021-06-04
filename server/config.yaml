@@ -91,3 +91,13 @@ es:
     - http://192.168.243.8:9200
   username: elastic
   password: GreatAge
+wx:
+  base_url: https://wechat.bluemoon.com.cn/wl-service/qyweixin/
+  corpid: 'wx36ef368cf28caea0'
+  agentid: '1000110'
+  group:
+    create: 'appChat/createChat'
+    send: 'message/sendChatMsg'
+    update: 'appChat/updateChat'
+    query: 'appChat/getAppChatDetail'
+    user: 'user/getUser'

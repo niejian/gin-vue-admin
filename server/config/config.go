@@ -12,6 +12,7 @@ type Server struct {
 	Zap         Zap         `mapstructure:"zap" json:"zap" yaml:"zap"`
 	LocalUpload LocalUpload `mapstructure:"localUpload" json:"localUpload" yaml:"localUpload"`
 	Es          Es          `mapstructure:"es" json:"es" yaml:"es"` // Es节点配置
+	Wx          Wx          `mapstructure:"wx" json:"wx" yaml:"wx"`
 }
 
 type System struct {
@@ -91,4 +92,19 @@ type Es struct {
 	Urls     []string `mapstructure:"urls" json:"urls" yaml:"urls"`
 	Username string   `mapstructure:"username" json:"username" yaml:"username"`
 	Password string   `mapstructure:"password" json:"password" yaml:"password"`
+}
+
+type Wx struct {
+	BaseUrl string  `mapstructure:"base_url" json:"base_url" yaml:"base_url"`
+	CorpId  string  `mapstructure:"corpid" json:"corpid" yaml:"corpid"`
+	AgentId string  `mapstructure:"agentid" json:"agentid" yaml:"agentid"`
+	Group   WxGroup `mapstructure:"group" json:"group" yaml:"group"`
+}
+
+type WxGroup struct {
+	Send   string `json:"send" yaml:"send" mapstructure:"send"`
+	Create string `json:"Create" yaml:"Create" mapstructure:"Create"`
+	Update string `json:"Update" yaml:"Update" mapstructure:"Update"`
+	Query  string `json:"query" yaml:"query" mapstructure:"query"`
+	User   string `json:"user" yaml:"user" mapstructure:"user"`
 }

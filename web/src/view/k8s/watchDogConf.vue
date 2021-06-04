@@ -228,7 +228,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           let data = {}
-          debugger
+          
           if (this.form.errs.length > 0) {
             data.errs = this.form.errs.join("|")
           }

@@ -63,3 +63,28 @@ export const getExceptionById = (indexName, id) => {
     method: 'get'
   })
 }
+
+// 添加或更新告警提醒
+export const addOrUpdateErrorWarn = (data) => {
+  return service({
+    url: '/errorWarn/addOrUpdate',
+    method: 'POST',
+    data
+  })
+}
+
+export const getConfInfoByIndexName = (indexName) => {
+  return service({
+    url: '/errorWarn/getConfInfoByIndexName/'+indexName,
+    method: 'get',
+    
+  })
+}
+
+export const getUserInfo = (userId) => {
+  return service({
+    url: '/errorWarn/getUserInfo/'+userId,
+    method: 'get',
+    
+  })
+}

@@ -47,6 +47,7 @@ func Routers() *gin.Engine {
 	router.InitWatchdogRouter(ApiGroup)              //看门狗相关
 	router.InitSysWebssh(ApiGroup)                   // web ssh
 	router.InitK8sApi(ApiGroup)                      // k8sapi
+	router.InitWatchdogErrorWarnRouter(ApiGroup)
 
 	global.GVA_LOG.Info("router register success")
 	return Router

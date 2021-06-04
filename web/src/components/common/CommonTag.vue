@@ -40,38 +40,44 @@ export default {
   },
   methods: {
     handleClose(tag) {
-        this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
-      },
+      debugger
+      let index = this.dynamicTags.indexOf(tag)
+      this.dynamicTags.splice(index, 1);
+      this.$forceUpdate();
+      //this.$set(this.dynamicTags, index, null)
+    },
 
-      showInput() {
-        this.inputVisible = true;
-        this.$nextTick(_ => {
-          this.$refs.saveTagInput.$refs.input.focus();
+    showInput() {
+      debugger
+      this.inputVisible = true;
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+
+    handleInputConfirm() {
+      let inputValue = this.inputValue;
+      // 校验数据的唯一性
+      if (inputValue && this.dynamicTags.includes(inputValue)) {
+
+        this.$notify.error({
+          title: '错误',
+          message: "【" + this.moduleName + '】已存在' + inputValue + ", 请重新输入！"
         });
-      },
-
-      handleInputConfirm() {
-        let inputValue = this.inputValue;
-        // 校验数据的唯一性
-        if (inputValue && this.dynamicTags.includes(inputValue)) {
-
-          this.$notify.error({
-            title: '错误',
-            message: "【" + this.moduleName + '】已存在' + inputValue + ", 请重新输入！"
-          });
-          this.inputValue = ''
-          return
-        }
-        if (inputValue) {
-          this.dynamicTags.push(inputValue);
-        }
-        this.inputVisible = false;
-        this.inputValue = '';
-      },
-
-      getData() {
-        return this.dynamicTags
+        this.inputValue = ''
+        return
       }
+      if (inputValue) {
+        debugger
+        this.dynamicTags.push(inputValue);
+      }
+      this.inputVisible = false;
+      this.inputValue = '';
+    },
+
+    getData() {
+      return this.dynamicTags
+    }
   }
 
 }
