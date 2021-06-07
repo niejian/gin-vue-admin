@@ -26,18 +26,27 @@
       <el-form-item label="cron表达式" label-width="100px" prop="sendTime">
         <el-input v-model="form.sendTime" style="width:400px"></el-input> <el-link type="primary" href="https://cron.qqe2.com" target="_blank">在线验证cron表达式</el-link>
       </el-form-item>
+      <el-form-item label="是否开启" label-width="100px" icon="el-icon-question">
+        <!-- <i class="el-icon-question"></i> -->
+        
+        <el-switch v-model="form.isEnable"></el-switch>
+      </el-form-item>
       <el-form-item>
           <el-input style="display:none" v-model="form.chatId"></el-input>
           <el-button type="primary" @click="onSubmit('form')">立即更新</el-button>
           <!-- <el-button>取消</el-button> -->
         </el-form-item>
+        
     </el-form>
   </div>
 </template>
 
 <script>
+// import { isValidCron } from 'cron-validator'
+// import { cronParse } from 'cron-parser'
+
 import {
-  getExceptionOverview,
+  getExceptionView,
   addOrUpdateErrorWarn,
   getConfInfoByIndexName,
   getUserInfo
@@ -48,6 +57,7 @@ export default {
   components: { CommonTag },
   data(){
     return {
+      //isDisable: false,
       indexNames: [],
       toUserIdsModuleName: "群发成员",
       aggIndexs: [],
@@ -57,6 +67,7 @@ export default {
         groupName: '',
         sendTime: '',
         chatId: "-1",
+        isEnable: true
       },
       rules: {
         indexName: [
@@ -66,7 +77,19 @@ export default {
           { required: true, message: '请输入群聊名称', trigger: 'blur' },
         ],
         sendTime: [
-          { required: true, message: '请填写群发时间', trigger: 'blur' },
+          { required: true, message: '请填写cron表达式', trigger: 'blur' },
+          {validator: function(rule, val, callback){
+            let cronParse = require('cron-parser');
+            try {
+              const interval = cronParse.parseExpression(val)
+              console.log('cronDate:', interval.next().toDate())
+              callback()
+            } catch (e) {
+              callback('非Cron表达式格式，请检查！' + e.message)
+            }
+          
+          }, trigger: 'blur'
+          }
         ],
         toUserIds: [
           { required: true, message: '请填写告警通知人编号', trigger: 'blur' },
@@ -106,6 +129,7 @@ export default {
           // let toUserIds = []
           // let userIds = ''
           let data = this.form
+          data.isEnable = this.form.isEnable?1:0
           // if (this.form.toUserIds.length > 0) {
           //   toUserIds = this.form.toUserIds
           //   userIds = toUserIds.join("|")
@@ -117,12 +141,9 @@ export default {
       })
     },
     addOrUpdate(data){
-      
       // 创建或更新
       addOrUpdateErrorWarn(data).then((resp) => {
-        debugger
         if(resp.code == 0) {
-          debugger
           this.$notify({
             title: '成功',
             message: '更新成功',
@@ -143,12 +164,14 @@ export default {
 
     },
     formReset(){
-      
+      this.$refs['form'].resetFields();
+      //this.isDisable=false
       this.form = {
         indexName: '',
         chatGroupName: '',
         sendTime: '',
         chatId: "-1",
+        isEnable: true
       } 
       this.form.toUserIds = []  
     },
@@ -159,20 +182,23 @@ export default {
         this.form.indexName = e
         getConfInfoByIndexName(e).then((resp) => {
           if(resp.code == 0 && null != resp.data) {
+            //this.isDisable = true
             let userIds = resp.data.toUserIds
             this.form = resp.data
+            this.form.isEnable = resp.data.isEnable == 1 ? true : false
             this.form.toUserIds = userIds.split("|")
+            
           }
         })
       }
     }
   },
   async created() {
-    getExceptionOverview().then((data) => {
+    getExceptionView().then((data) => {
       if(data.code == 0) {
         // responseData = data.data
-        this.indexNames = data.data.indexNames
-        this.aggIndexs = data.data.aggIndexs
+        this.indexNames = (data.data.indexNames).sort((a, b) => a < b?-1:1)
+        
       }
     })
   }

@@ -11,4 +11,5 @@ type ErrWarnConf struct {
 	ChatId    string `json:"ChatId" gorm:"comment:'群聊Id'"`
 	SendTime  string `json:"sendTime" gorm:"comment:'定时发送时间,cron表达式'"`
 	GroupName string `json:"groupName" gorm:"comment:'群聊名称'"`
+	IsEnable  int    `json:"isEnable" grom:"是否启用"`
 }

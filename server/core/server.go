@@ -25,6 +25,9 @@ func RunWindowsServer() {
 		initialize.ElasticSearch()
 	}
 
+	// 启动定时任务
+	initialize.InitializeCron()
+
 	Router := initialize.Routers()
 	Router.Static("/form-generator", "./resource/page")
 	Router.Use(static.Serve("/fe", static.LocalFile("./fe", false)))

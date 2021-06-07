@@ -2,6 +2,7 @@ package global
 
 import (
 	"github.com/olivere/elastic/v7"
+	"github.com/robfig/cron"
 	"go.uber.org/zap"
 
 	"gin-vue-admin/config"
@@ -16,6 +17,7 @@ var (
 	GVA_CONFIG config.Server
 	GVA_VP     *viper.Viper
 	//GVA_LOG    *oplogging.Logger
-	GVA_LOG *zap.Logger
-	GVA_ES  *elastic.Client
+	GVA_LOG  *zap.Logger
+	GVA_ES   *elastic.Client
+	Cron_Map = make(map[string]*cron.Cron, 10)
 )

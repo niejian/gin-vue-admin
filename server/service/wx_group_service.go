@@ -158,3 +158,39 @@ func GetWxUser(userIds []string) ([]*config.QueryUserInfoResponse, error) {
 
 	return datas, nil
 }
+
+//SendWxGroupMsg doc
+//@Description: 发送群聊信息
+//@Author niejian
+//@Date 2021-06-07 10:19:48
+//@param chatId
+//@param msg
+//@return error
+func SendWxGroupMsg(chatId, msg string) (*config.UpdateChatGroupResponse, error) {
+	url := global.GVA_CONFIG.Wx.BaseUrl + global.GVA_CONFIG.Wx.Group.Send
+	data := &config.WxGroupChatMsgStruct{
+		CorpId:  global.GVA_CONFIG.Wx.CorpId,
+		AgentId: global.GVA_CONFIG.Wx.AgentId,
+		Data: config.WxGroupChatMsgDataStruct{
+			ChatId:  chatId,
+			MsgType: "text",
+			Safe:    0,
+			Text: config.Text{
+				Content: msg,
+			},
+		},
+	}
+
+	// 发送
+	response := utils.Post(url, data, "")
+
+	var respData *config.UpdateChatGroupResponse
+	err := json.Unmarshal([]byte(response), &respData)
+	if err != nil {
+		global.GVA_LOG.Error("发送群聊结果转换失败", zap.String("err", err.Error()))
+		return nil, err
+	}
+	global.GVA_LOG.Info("发送群聊消息结果", zap.String("resp：", response))
+
+	return respData, nil
+}

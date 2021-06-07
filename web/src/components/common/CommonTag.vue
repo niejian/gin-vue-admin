@@ -43,6 +43,7 @@ export default {
       debugger
       let index = this.dynamicTags.indexOf(tag)
       this.dynamicTags.splice(index, 1);
+      // 强制更新视图
       this.$forceUpdate();
       //this.$set(this.dynamicTags, index, null)
     },

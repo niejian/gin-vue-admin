@@ -41,6 +41,7 @@ func AddOrUpdateErrorWarn(c *gin.Context) {
 		ChatId:    requestData.ChatId,
 		SendTime:  requestData.SendTime,
 		GroupName: requestData.GroupName,
+		IsEnable:  requestData.IsEnable,
 	}
 	// 判断员工号是否合法
 	userIds := requestData.ToUserIds

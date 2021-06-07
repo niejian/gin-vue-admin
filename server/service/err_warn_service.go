@@ -3,10 +3,15 @@
 package service
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
+	"go.uber.org/zap"
+	"strconv"
 	"strings"
+	"time"
 )
 
 //AddErrWarnConf doc
@@ -24,6 +29,10 @@ func AddErrWarnConf(errWarnConf *model.ErrWarnConf) (*model.ErrWarnConf, error) 
 	}
 	errWarnConf.ChatId = chatId
 	err = global.GVA_DB.Table("err_warn_conf").Create(&errWarnConf).Error
+	// 开始定时任务
+	if 1 == errWarnConf.IsEnable {
+		StartCron(errWarnConf)
+	}
 	return errWarnConf, err
 }
 
@@ -75,6 +84,12 @@ func UpdateErrWarnConf(errWarnConf *model.ErrWarnConf) error {
 		//}
 		if err == nil {
 			global.GVA_DB.Table("err_warn_conf").Save(errWarnConf)
+			// 关闭定时任务
+			StopCron(errWarnConf)
+			// 开始定时任务
+			if 1 == errWarnConf.IsEnable {
+				StartCron(errWarnConf)
+			}
 			return nil
 		}
 		return err
@@ -117,4 +132,40 @@ func GetWarnConfByIndexName(indexName string) (*model.ErrWarnConf, error) {
 		return &confs[0], nil
 	}
 	return nil, nil
+}
+
+//SendErrWarn doc
+//@Description: 发送统计告警信息
+//@Author niejian
+//@Date 2021-06-07 10:53:10
+//@param data
+func SendErrWarn(data *model.ErrWarnConf) {
+	// 分类统计前一天改索引的异常信息
+	//aggs := GetExceptionOverview(data.IndexName, 1)
+	durationHour, _ := time.ParseDuration(fmt.Sprintf("%d%s", 0, "h"))
+	warnTime := time.Now().Add(durationHour).Format(FormatStartTime)
+	aggs := IndexOverview(data.IndexName, warnTime)
+	// 告警信息
+	var msg bytes.Buffer
+
+	if len(aggs) > 0 {
+		appName := strings.ReplaceAll(data.IndexName, indexPrefix, "")
+		msg.WriteString("时间：" + warnTime + "\n")
+		msg.WriteString("应用：" + appName + "\n")
+		for _, aggIndex := range aggs {
+			// 异常关键字
+			e := aggIndex.Key
+			// 告警次数
+			count := aggIndex.DocCount
+			msg.WriteString("异常：" + e + ", 数量：" + strconv.FormatInt(count, 10) + "\n")
+
+		}
+		// 发送群聊信息
+		_, err := SendWxGroupMsg(data.ChatId, msg.String())
+		if err != nil {
+			SendWxGroupMsg(data.ChatId, msg.String())
+		}
+	} else {
+		global.GVA_LOG.Error("无告警信息", zap.String("indexName", data.IndexName))
+	}
 }

@@ -9,4 +9,5 @@ type ErrorWarnStruct struct {
 	ChatId    string   `json:"chatId"`
 	ID        int      `json:"ID"`
 	GroupName string   `json:"groupName"`
+	IsEnable  int      `json:"isEnable"`
 }
