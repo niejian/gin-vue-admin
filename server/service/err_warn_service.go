@@ -142,7 +142,7 @@ func GetWarnConfByIndexName(indexName string) (*model.ErrWarnConf, error) {
 func SendErrWarn(data *model.ErrWarnConf) {
 	// 分类统计前一天改索引的异常信息
 	//aggs := GetExceptionOverview(data.IndexName, 1)
-	durationHour, _ := time.ParseDuration(fmt.Sprintf("%d%s", 0, "h"))
+	durationHour, _ := time.ParseDuration(fmt.Sprintf("%d%s", -24, "h"))
 	warnTime := time.Now().Add(durationHour).Format(FormatStartTime)
 	aggs := IndexOverview(data.IndexName, warnTime)
 	// 告警信息
