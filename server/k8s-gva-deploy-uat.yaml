@@ -1,0 +1,90 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: gva
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJoYXJib3IuYmx1ZW1vb24uY29tLmNuIjp7InVzZXJuYW1lIjoiZGVwbG95IiwicGFzc3dvcmQiOiJIYXJib3JAYm0xMjMiLCJlbWFpbCI6Inh1eGlhbnh1ZUBibHVlbW9vbi5jb20uY24iLCJhdXRoIjoiWkdWd2JHOTVPa2hoY21KdmNrQmliVEV5TXc9PSJ9fX0=
+kind: Secret
+metadata:
+  managedFields:
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:data:
+          .: {}
+          f:.dockerconfigjson: {}
+        f:type: {}
+      manager: kubectl
+      operation: Update
+      time: "2021-06-16T02:47:47Z"
+  name: harbor
+  namespace: gva
+type: kubernetes.io/dockerconfigjson
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: gva-deploy
+  namespace: gva
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gva-server
+  template:
+    metadata:
+      name: gva-server-pod
+      labels:
+        app: gva-server
+    spec:
+      imagePullSecrets:
+        - name: harbor
+      containers:
+        - name: gva-server-images
+          image: harbor.bluemoon.com.cn/cloud-platform/gva-server:v2
+          volumeMounts:
+            - mountPath: /etc/localtime
+              name: timezone
+            - mountPath: /root/.kube
+              name: k8s-manage
+          env:
+            - name: ENABLE_K8S
+              value: 'true'
+            - name: ES_URLS
+              value: 'http://192.168.243.16:9200,http://192.168.243.17:9200,http://192.168.243.8:9200'
+            - name: ES_USERNAME
+              value: 'elastic'
+            - name: ES_PASSWORD
+              value: 'GreatAge'
+            - name: MYSQL_URLS
+              value: '192.168.242.105:3306'
+            - name: MYSQL_USERNAME
+              value: 'apollo'
+            - name: MYSQL_PASSWORD
+              value: 'qq123123'
+
+
+      volumes:
+        - name: timezone
+          hostPath:
+            path: /etc/localtime
+        - name: k8s-manage
+          hostPath:
+            path: /root/.kube
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gva-server-service
+  namespace: gva
+spec:
+  selector:
+    app: gva-server
+  ports:
+    - port: 8888
+      targetPort: 8888
+      nodePort: 32766
+  type: NodePort
+
