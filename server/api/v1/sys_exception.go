@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gin-vue-admin/global"
 	"gin-vue-admin/global/response"
+	"gin-vue-admin/model/es"
 	"gin-vue-admin/model/request"
 	resp "gin-vue-admin/model/response"
 	"gin-vue-admin/service"
@@ -59,6 +60,10 @@ func GetExceptionOverview(c *gin.Context) {
 			zap.Any("days", days))
 		// 聚合查询错误列表信息
 		aggIndexs := service.GetExceptionOverview(initIndexName, days)
+		if aggIndexs == nil {
+			var datas []es.AggIndex
+			aggIndexs = append(datas, es.AggIndex{})
+		}
 		response.OkWithData(resp.IndexNameResponse{IndexNames: names, AggIndexs: aggIndexs}, c)
 
 	}

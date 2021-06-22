@@ -101,3 +101,10 @@ wx:
     update: 'appChat/updateChat'
     query: 'appChat/getAppChatDetail'
     user: 'user/getUser'
+exclude-ns:
+  - kube-system
+  - kubesphere
+  - kube-
+  - uat-
+  - prd-
+  - istio-

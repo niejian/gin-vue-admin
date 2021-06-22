@@ -249,6 +249,8 @@ export default {
     },
     // 预览
     showExceptionOverview(indexName, days){
+      // 清空表格数据
+      this.clearChart()
       getExceptionOverview({indexName: indexName, days: days}).then((data) => {
         //debugger
         // 请求成功
@@ -257,7 +259,7 @@ export default {
           // 重新获取到所有的索引名称
           this.indexNames = data.data.indexNames
           this.aggIndexs = data.data.aggIndexs
-          if (this.indexNames) {
+          if (this.indexNames && this.aggIndexs) {
             this.myChart = echarts.init(document.getElementById('chart'),'macarons');
             this.myChart.off('click')
             this.selectedIndexName = indexName
@@ -281,6 +283,15 @@ export default {
           }
         }                                     
       })
+    },
+     //
+    clearChart(){
+      debugger
+      if (this.myChart) {
+        this.myChart.xData = []
+        this.myChart.yData = []
+      }
+
     },
     closeDetail() {
       this.show = false

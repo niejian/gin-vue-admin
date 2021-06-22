@@ -13,6 +13,7 @@ type Server struct {
 	LocalUpload LocalUpload `mapstructure:"localUpload" json:"localUpload" yaml:"localUpload"`
 	Es          Es          `mapstructure:"es" json:"es" yaml:"es"` // Es节点配置
 	Wx          Wx          `mapstructure:"wx" json:"wx" yaml:"wx"`
+	ExcludeNs   []string    `mapstructure:"exclude-ns" json:"exclude-ns" yaml:"exclude-ns"`
 }
 
 type System struct {

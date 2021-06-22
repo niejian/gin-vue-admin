@@ -56,13 +56,18 @@ func ListNs() (*[]string, error) {
 		if creator, ok := annotations[anno]; ok && creator == "admin" {
 			continue
 		}
+		isContinue := true
+		for _, ns := range global.GVA_CONFIG.ExcludeNs {
+			if ns == namespace || strings.HasPrefix(namespace, ns) {
+				global.GVA_LOG.Info(" ns=" + namespace + "， 为忽略的命名空间，不处理")
+				isContinue = false
+				break
+			}
+		}
 
-		// 这个ns没有deploy也过滤掉
-		//deploys, _ := ListDeploy(namespace)
-		//if nil == deploys {
-		//	continue
-		//}
-		nsList = append(nsList, namespace)
+		if isContinue {
+			nsList = append(nsList, namespace)
+		}
 	}
 	return &nsList, nil
 }
